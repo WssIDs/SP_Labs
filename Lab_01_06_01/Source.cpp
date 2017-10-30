@@ -12,6 +12,8 @@
 // Глобальные переменные
 int     nPosX = 10;
 int     nPosY = 30;
+int g_xpos;
+int g_ypos;
 LPCSTR  lpszAppName = "Демонстрация обработки ввода мыши и клавиатуры";
 LPCSTR lpszClassName = "Key And Mause Demo Class";
 HWND    hMainWnd;

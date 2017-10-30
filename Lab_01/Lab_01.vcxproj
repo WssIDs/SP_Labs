@@ -23,7 +23,7 @@
     <ProjectGuid>{3787226C-7ACC-43A4-A8EC-532126B9CCAD}</ProjectGuid>
     <RootNamespace>Lab_01</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
-    <ProjectName>SP_PR1_1</ProjectName>
+    <ProjectName>SP_PR2_IZ</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -112,10 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="sp_pr1.h.h" />
+    <ClCompile Include="sp_pr2_iz.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include "resource.h"
+#include "Windowsx.h"
 
 //-- Prototypes -------------------
 LRESULT CALLBACK SimWndProc(HWND, UINT, WPARAM, LPARAM);
@@ -168,8 +169,17 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 			int size;
 			size = LoadString(hInst, LOWORD(wParam), Buf, 300);
 			hdc1 = GetDC(hWnd);
-			TextOut(hdc1, rc.left + 10, rc.bottom - 30,
-				lpszMsgSpace, lstrlen(lpszMsgSpace));
+
+			HGDIOBJ original = NULL;;
+
+			original = SelectObject(hdc1, GetStockObject(DC_PEN));
+			SetDCBrushColor(hdc1, RGB(0, 255, 0));
+			SetDCPenColor(hdc1, RGB(0, 0, 255));
+
+			//SelectObject(hdc1, GetStockObject(DC_BRUSH));
+			Rectangle(hdc1, rc.left, rc.bottom - 40,300, rc.bottom);
+			SelectObject(hdc1, original);
+			
 			TextOut(hdc1, rc.left + 10, rc.bottom - 30, Buf, lstrlen(Buf));
 			ReleaseDC(hWnd, hdc1);
 		}

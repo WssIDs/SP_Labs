@@ -1,10 +1,6 @@
 #include <Windows.h>
 #include <tchar.h>
 
-
-#include <Windows.h>
-#include <tchar.h>
-
 //-- Prototypes -------------------
 LRESULT CALLBACK Pr2_WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -13,7 +9,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND, UINT, WPARAM, LPARAM);
 LPTSTR g_lpszClassName = TEXT("sp_pr2_class");
 LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
-LPTSTR  g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
+LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
 
 //  Стартовая функция 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -47,7 +43,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	DWORD Style;
-	Style = WS_OVERLAPPEDWINDOW^WS_MINIMIZEBOX;
+	Style = WS_OVERLAPPEDWINDOW ^ WS_MINIMIZEBOX;
 
 	hWnd = CreateWindowEx(NULL, wc.lpszClassName,
 		g_lpszAplicationTitle,
@@ -93,25 +89,24 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 		MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
 	}
 	return 0;
-	
+
 	case WM_LBUTTONDOWN:
 	{
 		HDC hdc = GetDC(hWnd);//получить контекст
+		int x = LOWORD(lParam);
+		int y = HIWORD(lParam);
 		RECT rect;
+
 		GetClientRect(hWnd, &rect);
-		rect.left = 50; 
-		rect.top = 50;
+
+		rect.left = x;
+		rect.top = y;
 		rect.bottom = rect.top + 300;
 
 		TCHAR lpszBuff[200];
-		int x = LOWORD(lParam);
-		int y = HIWORD(lParam);
-
 		wsprintf(lpszBuff, TEXT("Обработка сообщения WM_LBUTTONDOWN, которое посылается в окно при щелчке левой кнопки мыши."), TEXT("Hello, O World!"));
-		//TextOut(hdc, x, y, lpszBuff, lstrlen(lpszBuff));
 
-		DrawText(hdc, lpszBuff, -1, &rect, DT_CENTER);
-
+		DrawText(hdc, lpszBuff, -1, &rect, DT_LEFT);
 		ReleaseDC(hWnd, hdc);//Освободить контекст
 	}
 	return 0;

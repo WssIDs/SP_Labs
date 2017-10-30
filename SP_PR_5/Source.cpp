@@ -90,6 +90,9 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam)
 {
 
+	static int Xpos;
+	static int Ypos;
+
 	HDC hDC;
 
 	switch (msg)
@@ -178,6 +181,39 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 		}
 		break;
 
+		case WM_LBUTTONDOWN:
+		{
+			RECT rc;
+			GetWindowRect(hWnd, &rc);
+			int width = rc.right - rc.left;
+			int height = rc.bottom - rc.top;
+
+			if (Ypos <= height / 2 - 50 || Ypos >= height / 2 + 50)
+			{
+				HDC hdc1;
+				hdc1 = GetDC(hWnd);
+
+				GetWindowRect(hWnd, &rc);
+				int width = rc.right - rc.left;
+				int height = rc.bottom - rc.top;
+
+				TCHAR lpszBuff[200];
+
+				wsprintf(lpszBuff, TEXT("WM_PAINT обработчик %d, %d"), Xpos, Ypos);
+
+				TextOut(hdc1, Xpos, Ypos, lpszBuff, lstrlen(lpszBuff));
+			}
+
+		}
+		return 0;
+
+		case  WM_MOUSEMOVE:
+		{
+			Xpos = LOWORD(lParam);
+			Ypos = HIWORD(lParam);
+		}
+		return 0;
+
 		case WM_CREATE:
 		{
 			HMENU hMainMenu = GetMenu(hWnd);
@@ -190,6 +226,19 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 		{
 			PAINTSTRUCT ps;
 			hDC = BeginPaint(hWnd, &ps); // Получение контекста для обновления окна
+
+			RECT rc;
+
+			GetWindowRect(hWnd, &rc);
+			int width = rc.right - rc.left;
+			int height = rc.bottom - rc.top;
+
+			TCHAR lpszBuff[200];
+
+			wsprintf(lpszBuff, TEXT("WM_PAINT обработчик %d, %d"), Xpos,Ypos);
+
+			TextOut(hDC, width/2, height/2, lpszBuff, lstrlen(lpszBuff));
+
 			EndPaint(hWnd, &ps); // Завершение обновления окна
 		}
 		return 0;
