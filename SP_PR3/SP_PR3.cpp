@@ -1,27 +1,17 @@
-#include <Windows.h>
-#include <tchar.h>
-#include "resource.h"
-#include "Windowsx.h"
-
-//-- Prototypes -------------------
-LRESULT CALLBACK SimWndProc(HWND, UINT, WPARAM, LPARAM);
-
-
-//-- Global Variables ------------ 
-//HMENU g_lpszMenu;
+#include "sp_pr3.h"
 
 //  Стартовая функция 
-int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPTSTR lpszCmdLine, int nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
 {
 	WNDCLASSEX wc;
 	MSG msg;
 	HWND hWnd;
+	g_hInst = hInstance;
 
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.lpszClassName = TEXT("VMainWindowClass");
-	wc.lpfnWndProc = SimWndProc;
+	wc.lpfnWndProc = Pr2_WndProc;
 	wc.style = CS_VREDRAW | CS_HREDRAW;
 	wc.hInstance = hInstance;
 	wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
@@ -48,7 +38,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	lpszMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_MENU1));
 
 	hWnd = CreateWindowEx(NULL, wc.lpszClassName,
-		TEXT("Володько Виталий Иванович"),
+		g_lpszAplicationTitle,
 		Stl,
 		200,
 		200,
@@ -86,15 +76,36 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 }
 
 // Оконная процедура
-LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
+LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam)
 {
-
+	static HWND hList;
 	HDC hDC;
 
 	switch (msg)
 	{
-		// Обработка меню
+		case WM_LBUTTONDOWN:
+		{
+			HDC hdc = GetDC(hWnd);//получить контекст
+			int x = LOWORD(lParam);
+			int y = HIWORD(lParam);
+			RECT rect;
+
+			GetClientRect(hWnd, &rect);
+
+			rect.left = x;
+			rect.top = y;
+			rect.bottom = rect.top + 300;
+
+			TCHAR lpszBuff[200];
+			wsprintf(lpszBuff, TEXT("Обработка сообщения WM_LBUTTONDOWN, которое посылается в окно при щелчке левой кнопки мыши."), TEXT("Hello, O World!"));
+
+			DrawText(hdc, lpszBuff, -1, &rect, DT_LEFT);
+			ReleaseDC(hWnd, hdc);//Освободить контекст
+		}
+		return 0;
+
+			// Обработка меню
 		case WM_COMMAND:
 		{
 			int id = LOWORD(wParam);
@@ -105,52 +116,74 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 
 			switch (id)
 			{
+				case IDC_LIST:
+				{
+					switch (idNotification)
+					{
+						case LBN_SELCHANGE: // Клик по элементу списка Listbox
+						{
+							LPTSTR LBString = new TCHAR[1024];
+							int selIndex = 0;
+
+							// Получаем индекс текущей ячейки
+							selIndex = SendMessage(hList, LB_GETCURSEL, wParam, NULL);
+
+							// Получаем текст текущей ячейки
+							selIndex = SendMessage(hList, LB_GETTEXT, selIndex, (LPARAM)LBString);
+							MessageBox(hWnd, LBString, TEXT("Сообщение элемента управления"), MB_OK | MB_ICONINFORMATION);
+							delete[]LBString;
+						}
+						break;
+					}
+				}
+				break;
+
 				case IDM_FILE_NEW:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_NEW"), buff, MB_OK);
 				}
-					break;
+				break;
 				case IDM_FILE_OPEN:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_OPEN"), buff, MB_OK);
 				}
-					break;
+				break;
 				case IDM_FILE_SAVE:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_SAVE"), buff, MB_OK);
 				}
-					break;
+				break;
 				case IDM_FILE_EXIT:
 				{
 					DestroyWindow(hWnd);
 				}
-					break;
+				break;
 				case IDM_EDIT_SELECT:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_EDIT_SELECT"), buff, MB_OK);
 				}
-					break;
+				break;
 				case IDM_EDIT_COPY:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_EDIT_COPY"), buff, MB_OK);
 				}
-					break;
+				break;
 				case IDM_EDIT_PASTE:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_NEW"), buff, MB_OK);
 				}
-					break;
+				break;
 				case IDM_HELP_ABOUT:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_HELP_ABOUT"), buff, MB_OK);
 				}
-					break;
+				break;
 				default:
 				{
 					MessageBox(hWnd, TEXT("Команда не реализована"), buff, MB_OK);
 				}
-					break;
-			}
+				break;
+				}
 		}
 		return 0;
 
@@ -177,19 +210,24 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 			SetDCPenColor(hdc1, RGB(0, 0, 255));
 
 			//SelectObject(hdc1, GetStockObject(DC_BRUSH));
-			Rectangle(hdc1, rc.left, rc.bottom - 40,300, rc.bottom);
+			Rectangle(hdc1, rc.left, rc.bottom - 40, 300, rc.bottom);
 			SelectObject(hdc1, original);
-			
+
 			TextOut(hdc1, rc.left + 10, rc.bottom - 30, Buf, lstrlen(Buf));
 			ReleaseDC(hWnd, hdc1);
 		}
-		break;
+		return 0;
 
 		case WM_CREATE:
 		{
-			HMENU hMainMenu = GetMenu(hWnd);
-			// Create a popup menu ready for use
-			//HMENU popup_menu = CreatePopupMenu();
+			MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
+
+			hList = CreateWindowEx(NULL, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD, 20, 210, 200, 100, hWnd, (HMENU)IDC_LIST, g_hInst, NULL);
+
+			//// Добавляем в список несколько строк
+			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Первая тестовая запись");
+			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
+			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
 		}
 		return 0;
 
@@ -197,6 +235,11 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 		{
 			PAINTSTRUCT ps;
 			hDC = BeginPaint(hWnd, &ps); // Получение контекста для обновления окна
+
+			TCHAR lpszBuff[200];
+			wsprintf(lpszBuff, TEXT("Вывод текста при обработке сообщения WM_PAINT. Это соообщение окно получает после того, как оно было закрыто другим окном и затем открыто."), TEXT("Hello, O World!"));
+			TextOut(hDC, 20, 100, lpszBuff, lstrlen(lpszBuff));
+
 			EndPaint(hWnd, &ps); // Завершение обновления окна
 		}
 		return 0;
@@ -207,12 +250,16 @@ LRESULT CALLBACK SimWndProc(HWND hWnd, UINT msg,
 		}
 		return 0;
 
-	case WM_DESTROY:  // Завершение работы приложения
-		PostQuitMessage(0); // Посылка WM_QUIT приложению
-		break;
+		case WM_DESTROY:  // Завершение работы приложения
+		{
+			MessageBox(hWnd, g_lpszDestroyMessage, g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
 
-	default: // Вызов "Обработчика по умолчанию"
-		return(DefWindowProc(hWnd, msg, wParam, lParam));
+			PostQuitMessage(0); // Посылка WM_QUIT приложению
+		}
+		return 0;
+
+		default: // Вызов "Обработчика по умолчанию"
+			return(DefWindowProc(hWnd, msg, wParam, lParam));
 	}
 	return FALSE;// Для ветвей с "break"
 }

@@ -7,17 +7,19 @@ LRESULT CALLBACK Pr2_WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //-- Global Variables ------------ 
 LPTSTR g_lpszClassName = TEXT("sp_pr2_class");
+LPTSTR g_lpszlistboxClassName = TEXT("Button");
 LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
 LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
+HINSTANCE g_hInst;
 
 //  Стартовая функция 
-int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPTSTR lpszCmdLine, int nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
 {
 	WNDCLASSEX wc;
 	MSG msg;
 	HWND hWnd;
+	g_hInst = hInstance;
 
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -77,6 +79,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam)
 {
+	static HWND hList;
 	HDC hDC;
 
 	switch (msg)
@@ -84,9 +87,39 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	case WM_CREATE:
 	{
 		MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
+
+		hList = CreateWindowEx(NULL,TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD, 20, 210, 200, 100, hWnd, NULL, g_hInst, NULL);
+
+		//// Добавляем в список несколько строк
+		SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Первая тестовая запись");
+		SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
+		SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
 	}
 	return 0;
 	
+	case WM_COMMAND:
+	{
+		switch (HIWORD(wParam))
+		{
+			case LBN_SELCHANGE: // Клик по элементу списка Listbox
+			{
+				LPTSTR LBString = new TCHAR[1024];
+				int selIndex = 0;
+				
+				// Получаем индекс текущей ячейки
+				selIndex = SendMessage(hList, LB_GETCURSEL, wParam, NULL);
+
+				// Получаем текст текущей ячейки
+				selIndex = SendMessage(hList, LB_GETTEXT, selIndex, (LPARAM)LBString);
+				MessageBox(hWnd, LBString, TEXT("Сообщение элемента управления"), MB_OK | MB_ICONINFORMATION);
+				delete[]LBString;
+
+				break;
+			}
+		}
+	}
+	return 0;
+
 	case WM_LBUTTONDOWN:
 	{
 		HDC hdc = GetDC(hWnd);//получить контекст

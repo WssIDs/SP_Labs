@@ -17,13 +17,14 @@
 #define IDM_HELP_HELP                   40011
 #define IDM_HELP_ABOUT                  40012
 #define IDM_ACCELERATOR1                40013
+#define ID_BUTTON2                      40017
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        104
-#define _APS_NEXT_COMMAND_VALUE         40017
+#define _APS_NEXT_RESOURCE_VALUE        105
+#define _APS_NEXT_COMMAND_VALUE         40018
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
