@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SP_PR3.rc
+// Used by SP_SR3.rc
 //
 #define IDR_MENU1                       101
 #define IDI_ICON1                       102

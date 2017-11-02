@@ -1,4 +1,4 @@
-#include "sp_pr3.h"
+#include "sp_sr3.h"
 
 //  Стартовая функция 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
@@ -141,6 +141,18 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 				case IDM_FILE_NEW:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_NEW"), buff, MB_OK);
+
+					if (g_hEditMenu)
+					{
+
+						MENUITEMINFO mii;
+
+						mii.cbSize = sizeof(MENUITEMINFO);
+						mii.fMask = MIIM_STATE;
+						mii.fState = MFS_ENABLED;
+
+						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
+					}
 				}
 				break;
 				case IDM_FILE_OPEN:
@@ -153,6 +165,24 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_SAVE"), buff, MB_OK);
 				}
 				break;
+				case IDM_FILE_CLOSEDOC:
+				{
+					MessageBox(hWnd, TEXT("Нажата IDM_FILE_CLOSEDOC"), buff, MB_OK);
+					if (g_hEditMenu)
+					{
+
+						MENUITEMINFO mii;
+
+						mii.cbSize = sizeof(MENUITEMINFO);
+						mii.fMask = MIIM_STATE;
+						mii.fState = MFS_GRAYED;
+
+						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_COPY, FALSE, &mii);
+						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
+					}
+
+				}
+				break;
 				case IDM_FILE_EXIT:
 				{
 					DestroyWindow(hWnd);
@@ -161,6 +191,18 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 				case IDM_EDIT_SELECT:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_EDIT_SELECT"), buff, MB_OK);
+					
+					if (g_hEditMenu)
+					{
+
+						MENUITEMINFO mii;
+
+						mii.cbSize = sizeof(MENUITEMINFO);
+						mii.fMask = MIIM_STATE;
+						mii.fState = MFS_ENABLED;
+
+						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_COPY, FALSE, &mii);
+					}
 				}
 				break;
 				case IDM_EDIT_COPY:
@@ -222,6 +264,16 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Первая тестовая запись");
 			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
 			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
+
+			g_hMainMenu = GetMenu(hWnd);
+			g_hFileMenu = GetSubMenu(g_hMainMenu, 0);
+			g_hEditMenu = GetSubMenu(g_hMainMenu, 1);
+
+			CreateMenuItem(g_hFileMenu, "&Закрыть документ",0,IDM_FILE_CLOSEDOC, NULL, FALSE, MFT_STRING);
+
+			DrawMenuBar(hWnd);
+
+
 		}
 		return 0;
 
