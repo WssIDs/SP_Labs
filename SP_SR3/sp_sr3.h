@@ -16,15 +16,14 @@ LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
 LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
 
 // Global variables
-HINSTANCE g_hInst;
-HMENU g_hMainMenu;
-HMENU g_hFileMenu;
-HMENU g_hEditMenu;
+HINSTANCE	g_hInst;
+HMENU		g_hMainMenu;
+HMENU		g_hFileMenu;
+HMENU		g_hEditMenu;
 
 HMENU g_hPopupMenu;
 
-#define IDC_LIST 402
-
+#define IDC_LIST							402		// ListBox
 #define IDM_FILE_CLOSEDOC                   40100  // Элемент меню
 
 #define IDM_POPUP_SELECT
