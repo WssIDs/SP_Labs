@@ -13,19 +13,23 @@ BOOL Register(HINSTANCE);
 HWND Create(HINSTANCE, int);
 
 
-/* Обработчики соощений */
+/* Обработчики сообщений */
+/*--- WM_CREATE -----------------------------------------------------*/
+BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct);
 /*--- WM_DESTROY -----------------------------------------------------*/
-BOOL  km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct);
-/*--- WM_DESTROY -----------------------------------------------------*/
-void  km_OnDestroy(HWND hwnd);
+void km_OnDestroy(HWND hWnd);
 /*--- WM_LBUTTONDOWN , WM_LBUTTONDBCLK -------------------------------*/
-void  km_OnLButtonDown(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);
+void km_OnLButtonDown(HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);
 /*--- WM_RBUTTONDOWN , WM_RBUTTONDBCLK -------------------------------*/
-void  km_OnRButtonDown(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);
+void km_OnRButtonDown(HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);
 /*--- WM_PAINT -------------------------------------------------------*/
-void  km_OnPaint(HWND hwnd);
+void km_OnPaint(HWND hWnd);
 /*--- WM_CLOSE -------------------------------------------------------*/
-void  km_OnClose(HWND hwnd);
+void km_OnClose(HWND hWnd);
+/*--- WM_MENUSELECT -------------------------------------------------------*/
+void km_OnMenuSelect(HWND hWnd, HMENU hmenu, int item, HMENU hmenuPopup, UINT flags);
+/*--- WM_COMMAND ----------------------------------------------------------*/
+void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify);
 /*--------------------------------------------------------------------*/
 
 
