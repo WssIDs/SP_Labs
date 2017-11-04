@@ -3,62 +3,14 @@
 //  Стартовая функция 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
 {
-	WNDCLASSEX wc;
 	MSG msg;
 	HWND hWnd;
-	g_hInst = hInstance;
 
-	ZeroMemory(&wc, sizeof(WNDCLASSEX));
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.lpszClassName = TEXT("VMainWindowClass");
-	wc.lpfnWndProc = Pr2_WndProc;
-	wc.style = CS_VREDRAW | CS_HREDRAW;
-	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
-	wc.hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_CURSOR1));
-	HBRUSH hbr;
-	hbr = CreateSolidBrush(RGB(255, 0, 0));
-	wc.hbrBackground = hbr;
+	if (!Register(hInstance)) return FALSE;
 
-	wc.lpszMenuName = NULL;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
+	hWnd = Create(hInstance, nCmdShow);
 
-	if (!RegisterClassEx(&wc))
-	{
-		MessageBox(NULL, TEXT("Ошибка регистрации класса окна!"),
-			TEXT("Ошибка"), MB_OK | MB_ICONERROR);
-		return FALSE;
-	}
-
-	DWORD Stl;
-	Stl = WS_OVERLAPPEDWINDOW^WS_MINIMIZEBOX;
-
-	g_lpszMainMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_MENU1));
-
-	hWnd = CreateWindowEx(NULL, wc.lpszClassName,
-		g_lpszAplicationTitle,
-		Stl,
-		200,
-		200,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		NULL,
-		g_lpszMainMenu,
-		hInstance,
-		NULL
-	);
-
-	if (!hWnd)
-	{
-		MessageBox(NULL, TEXT("Окно не создано!"),
-			TEXT("Ошибка"), MB_OK | MB_ICONERROR);
-		return FALSE;
-	}
-
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
-
+	if (hWnd == NULL) return FALSE;
 
 	HACCEL hAccel;
 	hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
@@ -75,56 +27,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpsz
 }
 
 // Оконная процедура
-LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
-	WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hList;
-	HDC hDC;
-
 	switch (msg)
 	{
-		case WM_LBUTTONDOWN:
-		{
-			HDC hdc = GetDC(hWnd);//получить контекст
-			int x = LOWORD(lParam);
-			int y = HIWORD(lParam);
-			RECT rect;
-
-			GetClientRect(hWnd, &rect);
-
-			rect.left = x;
-			rect.top = y;
-			rect.bottom = rect.top + 300;
-
-			TCHAR lpszBuff[200];
-			wsprintf(lpszBuff, TEXT("Обработка сообщения WM_LBUTTONDOWN, которое посылается в окно при щелчке левой кнопки мыши."), TEXT("Hello, O World!"));
-
-			DrawText(hdc, lpszBuff, -1, &rect, DT_LEFT);
-			ReleaseDC(hWnd, hdc);//Освободить контекст
-		}
-		return 0;
-
-		case WM_RBUTTONDOWN:
-		{
-			DWORD xy = GetMessagePos();
-			WORD x = LOWORD(xy),
-				 y = HIWORD(xy);
-
-			HMENU hPopupMenu = CreatePopupMenu();
-
-			MENUITEMINFO mii;
-			GetMenuItemInfo(hPopupMenu, IDM_EDIT_SELECT, FALSE, &mii);
-
-			CreateMenuItem(hPopupMenu, TEXT("Выделить"), 0, IDM_EDIT_SELECT,NULL, FALSE, MFT_STRING);
-			SetMenuItemInfo(hPopupMenu,IDM_EDIT_SELECT,FALSE,&mii);
-			TrackPopupMenu(hPopupMenu, TPM_CENTERALIGN | TPM_LEFTBUTTON | TPM_VCENTERALIGN, x, y, 0, hWnd, NULL);
-			
-			DestroyMenu(hPopupMenu);
-		}
-		return 0;
-
-
-			// Обработка меню
+		// Обработка меню
 		case WM_COMMAND:
 		{
 			int id = LOWORD(wParam);
@@ -145,10 +52,10 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 							int selIndex = 0;
 
 							// Получаем индекс текущей ячейки
-							selIndex = SendMessage(hList, LB_GETCURSEL, wParam, NULL);
+							selIndex = SendMessage(g_hList, LB_GETCURSEL, wParam, NULL);
 
 							// Получаем текст текущей ячейки
-							selIndex = SendMessage(hList, LB_GETTEXT, selIndex, (LPARAM)LBString);
+							selIndex = SendMessage(g_hList, LB_GETTEXT, selIndex, (LPARAM)LBString);
 							MessageBox(hWnd, LBString, TEXT("Сообщение элемента управления"), MB_OK | MB_ICONINFORMATION);
 							delete[]LBString;
 						}
@@ -273,57 +180,84 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 		}
 		return 0;
 
-		case WM_CREATE:
-		{
-			MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
-
-			hList = CreateWindowEx(NULL, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD, 20, 210, 200, 100, hWnd, (HMENU)IDC_LIST, g_hInst, NULL);
-
-			//// Добавляем в список несколько строк
-			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Первая тестовая запись");
-			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
-			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
-
-			g_lpszFileMenu = GetSubMenu(g_lpszMainMenu, 0);
-			g_lpszEditMenu = GetSubMenu(g_lpszMainMenu, 1);
-
-			CreateMenuItem(g_lpszFileMenu, "&Закрыть документ",0,IDM_FILE_CLOSEDOC, NULL, FALSE, MFT_STRING);
-
-		}
-		return 0;
-
-		case WM_PAINT:    // Вывод при обновлении окна
-		{
-			PAINTSTRUCT ps;
-			hDC = BeginPaint(hWnd, &ps); // Получение контекста для обновления окна
-
-			TCHAR lpszBuff[200];
-			wsprintf(lpszBuff, TEXT("Вывод текста при обработке сообщения WM_PAINT. Это соообщение окно получает после того, как оно было закрыто другим окном и затем открыто."), TEXT("Hello, O World!"));
-			TextOut(hDC, 20, 100, lpszBuff, lstrlen(lpszBuff));
-
-			EndPaint(hWnd, &ps); // Завершение обновления окна
-		}
-		return 0;
-
-		case WM_CLOSE:  // Перед разрушением
-		{
-			DestroyWindow(hWnd);
-		}
-		return 0;
-
-		case WM_DESTROY:  // Завершение работы приложения
-		{
-			MessageBox(hWnd, g_lpszDestroyMessage, g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
-
-			PostQuitMessage(0); // Посылка WM_QUIT приложению
-		}
-		return 0;
+		HANDLE_MSG(hWnd, WM_CLOSE, km_OnClose);					// Перед разрушением
+		HANDLE_MSG(hWnd, WM_LBUTTONDOWN, km_OnLButtonDown);
+		HANDLE_MSG(hWnd, WM_RBUTTONDOWN, km_OnRButtonDown);
+		HANDLE_MSG(hWnd, WM_CREATE, km_OnCreate);				// Вывод при обновлении окна
+		HANDLE_MSG(hWnd, WM_PAINT, km_OnPaint);					// Вывод при обновлении окна
+		HANDLE_MSG(hWnd, WM_DESTROY, km_OnDestroy);				// Завершение работы приложения
 
 		default: // Вызов "Обработчика по умолчанию"
 			return(DefWindowProc(hWnd, msg, wParam, lParam));
 	}
 	return FALSE;// Для ветвей с "break"
 }
+
+
+
+BOOL Register(HINSTANCE hInst)
+{
+	WNDCLASSEX wc;
+
+	ZeroMemory(&wc, sizeof(WNDCLASSEX));
+	wc.cbSize = sizeof(WNDCLASSEX);
+	wc.lpszClassName = g_lpszClassName;
+	wc.lpfnWndProc = Pr2_WndProc;
+	wc.style = CS_VREDRAW | CS_HREDRAW;
+	wc.hInstance = hInst;
+	wc.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1));
+	wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(IDC_CURSOR1));
+	HBRUSH hbr;
+	hbr = CreateSolidBrush(RGB(255, 0, 0));
+	wc.hbrBackground = hbr;
+
+	wc.lpszMenuName = NULL;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+
+	if (!RegisterClassEx(&wc))
+	{
+		MessageBox(NULL, TEXT("Ошибка регистрации класса окна!"),
+			TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+HWND Create(HINSTANCE hInstance, int nCmdShow)
+{
+	DWORD Stl;
+	Stl = WS_OVERLAPPEDWINDOW^WS_MINIMIZEBOX;
+
+	g_lpszMainMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_MENU1));
+
+	HWND hWnd = CreateWindowEx(NULL, g_lpszClassName,
+		g_lpszAplicationTitle,
+		Stl,
+		200,
+		200,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		NULL,
+		g_lpszMainMenu,
+		hInstance,
+		NULL
+	);
+
+	if (!hWnd)
+	{
+		MessageBox(NULL, TEXT("Окно не создано!"),
+			TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+		return NULL;
+	}
+
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
+
+	return hWnd;
+}
+
 
 
 BOOL CreateMenuItem(HMENU hMenu, char *str, UINT uIns, UINT uCom, HMENU hSubMenu, BOOL flag, UINT fType)
@@ -338,4 +272,97 @@ BOOL CreateMenuItem(HMENU hMenu, char *str, UINT uIns, UINT uCom, HMENU hSubMenu
 	mii.wID = uCom;
 	mii.hSubMenu = hSubMenu;
 	return InsertMenuItem(hMenu, uIns, flag, &mii);
+}
+
+
+/////////////////////////////////
+
+BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
+{
+	MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
+
+	g_hList = CreateWindowEx(NULL, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD, 20, 210, 200, 100, hWnd, (HMENU)IDC_LIST, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+
+	if (!g_hList) return FALSE;
+
+	//// Добавляем в список несколько строк
+	SendMessage(g_hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Первая тестовая запись");
+	SendMessage(g_hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
+	SendMessage(g_hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
+
+	g_lpszFileMenu = GetSubMenu(g_lpszMainMenu, 0);
+	g_lpszEditMenu = GetSubMenu(g_lpszMainMenu, 1);
+
+	if (!CreateMenuItem(g_lpszFileMenu, "&Закрыть документ", 0, IDM_FILE_CLOSEDOC, NULL, FALSE, MFT_STRING)) return FALSE;
+
+	return TRUE;
+}
+
+
+void  km_OnLButtonDown(HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
+{
+	HDC hdc = GetDC(hWnd);//получить контекст
+	RECT rect;
+
+	GetClientRect(hWnd, &rect);
+
+	rect.left = x;
+	rect.top = y;
+	rect.bottom = rect.top + 300;
+
+	TCHAR lpszBuff[200];
+	wsprintf(lpszBuff, TEXT("Обработка сообщения WM_LBUTTONDOWN, которое посылается в окно при щелчке левой кнопки мыши."), TEXT("Hello, O World!"));
+
+	DrawText(hdc, lpszBuff, -1, &rect, DT_LEFT);
+	ReleaseDC(hWnd, hdc);//Освободить контекст
+}
+
+void  km_OnRButtonDown(HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
+{
+	DWORD xyPos = GetMessagePos();
+	WORD xPos = LOWORD(xyPos),
+		yPos = HIWORD(xyPos);
+
+	HMENU hPopupMenu = CreatePopupMenu();
+
+	MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
+	mii.fMask = MIIM_STATE;
+
+	GetMenuItemInfo(g_lpszEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
+	CreateMenuItem(hPopupMenu, TEXT("Выделить"), 0, IDM_EDIT_SELECT, NULL, FALSE, MFT_STRING);
+	SetMenuItemInfo(hPopupMenu, IDM_EDIT_SELECT, FALSE, &mii);
+
+	GetMenuItemInfo(g_lpszEditMenu, IDM_EDIT_COPY, FALSE, &mii);
+	CreateMenuItem(hPopupMenu, TEXT("Копировать"), 0, IDM_EDIT_COPY, NULL, FALSE, MFT_STRING);
+	SetMenuItemInfo(hPopupMenu, IDM_EDIT_COPY, FALSE, &mii);
+
+	TrackPopupMenu(hPopupMenu, TPM_CENTERALIGN | TPM_LEFTBUTTON | TPM_VCENTERALIGN, xPos, yPos, 0, hWnd, NULL);
+
+	DestroyMenu(hPopupMenu);
+}
+
+
+void km_OnPaint(HWND hWnd)
+{
+	PAINTSTRUCT ps;
+	HDC hDC = BeginPaint(hWnd, &ps); // Получение контекста для обновления окна
+
+	TCHAR lpszBuff[200];
+	wsprintf(lpszBuff, TEXT("Вывод текста при обработке сообщения WM_PAINT. Это соообщение окно получает после того, как оно было закрыто другим окном и затем открыто."), TEXT("Hello, O World!"));
+	TextOut(hDC, 20, 100, lpszBuff, lstrlen(lpszBuff));
+
+	EndPaint(hWnd, &ps); // Завершение обновления окна
+}
+
+
+void km_OnClose(HWND hWnd)
+{
+	DestroyWindow(hWnd);
+}
+
+void km_OnDestroy(HWND hWnd)
+{
+	MessageBox(hWnd, g_lpszDestroyMessage, g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
+
+	PostQuitMessage(0); // Посылка WM_QUIT приложению
 }

@@ -80,6 +80,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam)
 {
+	static HWND hEdit;
+
+#define IDC_EDIT		30100 
+
 	HDC hDC;
 
 	switch (msg)
@@ -87,27 +91,12 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	case WM_CREATE:
 	{
 		MessageBox(hWnd, TEXT("¬ыполн€етс€ обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
-	}
-	return 0;
 
-	case WM_LBUTTONDOWN:
-	{
-		HDC hdc = GetDC(hWnd);//получить контекст
-		int x = LOWORD(lParam);
-		int y = HIWORD(lParam);
-		RECT rect;
+		RECT rc;
+		GetClientRect(hWnd, &rc);
 
-		GetClientRect(hWnd, &rect);
-
-		rect.left = x;
-		rect.top = y;
-		rect.bottom = rect.top + 300;
-
-		TCHAR lpszBuff[200];
-		wsprintf(lpszBuff, TEXT("ќбработка сообщени€ WM_LBUTTONDOWN, которое посылаетс€ в окно при щелчке левой кнопки мыши."), TEXT("Hello, O World!"));
-
-		DrawText(hdc, lpszBuff, -1, &rect, DT_LEFT);
-		ReleaseDC(hWnd, hdc);//ќсвободить контекст
+		hEdit = CreateWindow(TEXT("edit"), NULL, WS_CHILD | WS_VSCROLL | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL,rc.left, rc.top, rc.right, rc.bottom, hWnd, (HMENU)IDC_EDIT, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+		SetFocus(hEdit);
 	}
 	return 0;
 
@@ -115,10 +104,10 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	{
 		PAINTSTRUCT ps;
 		hDC = BeginPaint(hWnd, &ps); // ѕолучение контекста дл€ обновлени€ окна
+		RECT rc;
+		GetClientRect(hWnd, &rc);
 
-		TCHAR lpszBuff[200];
-		wsprintf(lpszBuff, TEXT("¬ывод текста при обработке сообщени€ WM_PAINT. Ёто соообщение окно получает после того, как оно было закрыто другим окном и затем открыто."), TEXT("Hello, O World!"));
-		TextOut(hDC, 20, 100, lpszBuff, lstrlen(lpszBuff));
+		SetWindowPos(hEdit, HWND_TOP, rc.left, rc.top, rc.right, rc.bottom, NULL);
 
 		EndPaint(hWnd, &ps); // «авершение обновлени€ окна
 	}
