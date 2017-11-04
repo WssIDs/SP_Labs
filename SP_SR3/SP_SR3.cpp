@@ -34,8 +34,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpsz
 	DWORD Stl;
 	Stl = WS_OVERLAPPEDWINDOW^WS_MINIMIZEBOX;
 
-	HMENU lpszMenu;
-	lpszMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_MENU1));
+	g_lpszMainMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_MENU1));
 
 	hWnd = CreateWindowEx(NULL, wc.lpszClassName,
 		g_lpszAplicationTitle,
@@ -45,7 +44,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpsz
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		NULL,
-		lpszMenu,
+		g_lpszMainMenu,
 		hInstance,
 		NULL
 	);
@@ -105,6 +104,26 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 		}
 		return 0;
 
+		case WM_RBUTTONDOWN:
+		{
+			DWORD xy = GetMessagePos();
+			WORD x = LOWORD(xy),
+				 y = HIWORD(xy);
+
+			HMENU hPopupMenu = CreatePopupMenu();
+
+			MENUITEMINFO mii;
+			GetMenuItemInfo(hPopupMenu, IDM_EDIT_SELECT, FALSE, &mii);
+
+			CreateMenuItem(hPopupMenu, TEXT("Выделить"), 0, IDM_EDIT_SELECT,NULL, FALSE, MFT_STRING);
+			SetMenuItemInfo(hPopupMenu,IDM_EDIT_SELECT,FALSE,&mii);
+			TrackPopupMenu(hPopupMenu, TPM_CENTERALIGN | TPM_LEFTBUTTON | TPM_VCENTERALIGN, x, y, 0, hWnd, NULL);
+			
+			DestroyMenu(hPopupMenu);
+		}
+		return 0;
+
+
 			// Обработка меню
 		case WM_COMMAND:
 		{
@@ -142,7 +161,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_NEW"), buff, MB_OK);
 
-					if (g_hEditMenu)
+					if (g_lpszEditMenu)
 					{
 
 						MENUITEMINFO mii;
@@ -151,7 +170,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 						mii.fMask = MIIM_STATE;
 						mii.fState = MFS_ENABLED;
 
-						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
+						SetMenuItemInfo(g_lpszEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
 					}
 				}
 				break;
@@ -168,7 +187,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 				case IDM_FILE_CLOSEDOC:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_CLOSEDOC"), buff, MB_OK);
-					if (g_hEditMenu)
+					if (g_lpszEditMenu)
 					{
 
 						MENUITEMINFO mii;
@@ -177,8 +196,8 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 						mii.fMask = MIIM_STATE;
 						mii.fState = MFS_GRAYED;
 
-						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_COPY, FALSE, &mii);
-						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
+						SetMenuItemInfo(g_lpszEditMenu, IDM_EDIT_COPY, FALSE, &mii);
+						SetMenuItemInfo(g_lpszEditMenu, IDM_EDIT_SELECT, FALSE, &mii);
 					}
 
 				}
@@ -192,7 +211,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_EDIT_SELECT"), buff, MB_OK);
 					
-					if (g_hEditMenu)
+					if (g_lpszEditMenu)
 					{
 
 						MENUITEMINFO mii;
@@ -201,7 +220,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 						mii.fMask = MIIM_STATE;
 						mii.fState = MFS_ENABLED;
 
-						SetMenuItemInfo(g_hEditMenu, IDM_EDIT_COPY, FALSE, &mii);
+						SetMenuItemInfo(g_lpszEditMenu, IDM_EDIT_COPY, FALSE, &mii);
 					}
 				}
 				break;
@@ -212,7 +231,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 				break;
 				case IDM_EDIT_PASTE:
 				{
-					MessageBox(hWnd, TEXT("Нажата IDM_FILE_NEW"), buff, MB_OK);
+					MessageBox(hWnd, TEXT("Нажата IDM_FILE_PASTE"), buff, MB_OK);
 				}
 				break;
 				case IDM_HELP_ABOUT:
@@ -265,14 +284,10 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
 			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
 
-			g_hMainMenu = GetMenu(hWnd);
-			g_hFileMenu = GetSubMenu(g_hMainMenu, 0);
-			g_hEditMenu = GetSubMenu(g_hMainMenu, 1);
+			g_lpszFileMenu = GetSubMenu(g_lpszMainMenu, 0);
+			g_lpszEditMenu = GetSubMenu(g_lpszMainMenu, 1);
 
-			CreateMenuItem(g_hFileMenu, "&Закрыть документ",0,IDM_FILE_CLOSEDOC, NULL, FALSE, MFT_STRING);
-
-			DrawMenuBar(hWnd);
-
+			CreateMenuItem(g_lpszFileMenu, "&Закрыть документ",0,IDM_FILE_CLOSEDOC, NULL, FALSE, MFT_STRING);
 
 		}
 		return 0;

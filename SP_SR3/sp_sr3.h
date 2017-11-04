@@ -17,14 +17,12 @@ LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщени
 
 // Global variables
 HINSTANCE	g_hInst;
-HMENU		g_hMainMenu;
-HMENU		g_hFileMenu;
-HMENU		g_hEditMenu;
-
-HMENU g_hPopupMenu;
+HMENU		g_lpszMainMenu;
+HMENU		g_lpszFileMenu;
+HMENU		g_lpszEditMenu;
 
 #define IDC_LIST							402		// ListBox
 #define IDM_FILE_CLOSEDOC                   40100  // Элемент меню
 
-#define IDM_POPUP_SELECT
-#define IDM_POPUP_COPY
+#define CM_EDIT_SELECT						40101
+#define CM_EDIT_COPY						40102
