@@ -198,9 +198,7 @@ void km_OnDestroy(HWND hWnd)
 void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	TCHAR buff[200];
-	
 	DWORD dwNumbOfBytes = MAX_BYTES;
-	HANDLE hFile = NULL;
 
 	wsprintf(buff, TEXT("%d"), id);
 
@@ -213,6 +211,8 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_FILE_OPEN:
 		{
+			if (g_hFile) CloseHandle(g_hFile);
+
 			OPENFILENAME ofn;   // структура для common dialog box
 
 			//Иницализация OPENFILENAME
@@ -223,8 +223,8 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			ofn.lpstrFile[0] = '\0';
 			ofn.nMaxFile = sizeof(lpszFileSpec);
 			// Формирование массива строк шаблонов фильтра
-			ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
-			ofn.nFilterIndex = 1; // Индекс для текущего шаблона фильтра
+			ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0Bitmap\0*.BMP\0";
+			ofn.nFilterIndex = 2; // Индекс для текущего шаблона фильтра
 			ofn.lpstrFileTitle = NULL; // Без заголовка
 			ofn.nMaxFileTitle = 0;
 			ofn.lpstrInitialDir = NULL; // В качестве начального текущий каталог
@@ -234,19 +234,20 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			BOOL fRet = GetOpenFileName(&ofn);
 			if (fRet == FALSE) break;//ошибка в далоге 
 
-			hFile = CreateFile(lpszFileSpec, GENERIC_READ, 0,
+			g_hFile = CreateFile(lpszFileSpec, GENERIC_READ, 0,
 				NULL, OPEN_EXISTING,
 				FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hFile == INVALID_HANDLE_VALUE)
+			if (g_hFile == INVALID_HANDLE_VALUE)
 			{
 				MessageBox(hWnd, TEXT("Файл не найден"), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
 				break;
 			}
+			if (ofn.nFilterIndex == 1)
+			{
+				ReadFile(g_hFile, Buffer, 100, &dwNumbOfBytes, NULL);
+			}
 
-			ReadFile(hFile, Buffer, 100, &dwNumbOfBytes, NULL);
-
-			if (hFile) CloseHandle(hFile);
-
+			if (g_hFile) CloseHandle(g_hFile);
 		}
 		break;
 		case IDM_FILE_EXIT:
@@ -263,6 +264,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		{
 			//MessageBox(hWnd, TEXT("Нажата IDM_VIEW_BMP"), buff, MB_OK);
 			g_hwndDlg = CreateDialog((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG3), hWnd, (DLGPROC)LoadBmpDlgProc);
+			ShowWindow(g_hwndDlg, SW_SHOW);
 		}
 		break;
 		case IDM_HELP_ABOUT:
@@ -361,26 +363,37 @@ BOOL CALLBACK LoadBmpDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 {
 	switch (mes)
 	{ // Инициализация диалоговой панели
-	case WM_INITDIALOG:
-	{
+		case WM_INITDIALOG:
+		{
+		} 
+		return TRUE;
+		case WM_COMMAND:
+		{
+		}
+		return TRUE;
+		case WM_PAINT:
+		{
+			HBITMAP hBitmap;
+			BITMAP bm;
+			HDC hDC;
+			HDC hMemDC;
 
-	} return TRUE;
-	case WM_COMMAND:
-	{
-		switch (wParam)
-		{ // Еще один вариант завершения  работы немодального диалогового окна
-		  // Первый – в обработчике «WM_DESTROY»
-		  // Сообщение от кнопки "OK"
-		case IDOK:
-			//{ сохранение необходимых данных ...}
-			// Сообщение от «Cancel» – завершение без сохранения
-		case IDCANCEL:
-		{ // Уничтожаем диалоговую панель
+			hDC = GetDC(hDlg);
+			hMemDC = CreateCompatibleDC(hDC);
+			hBitmap = (HBITMAP)LoadImage(NULL, "image1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			GetObject(hBitmap, sizeof(BITMAP), &bm);
+			SelectObject(hMemDC, hBitmap);
+			BitBlt(hDC, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY);
+			DeleteDC(hMemDC);
+			ReleaseDC(hDlg, hDC);
+			DeleteObject(hBitmap);
+		}
+		return TRUE;
+		case WM_CLOSE:
+		{
 			DestroyWindow(hDlg);
-			return TRUE;
 		}
-		}
-	}
+		return TRUE;
 	}
 	return FALSE;
 }

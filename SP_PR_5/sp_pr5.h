@@ -51,7 +51,7 @@ TCHAR lpszFileSpec[256];
 TCHAR Buffer[MAX_BYTES] = TEXT("Шаг 1. Начало работы");
 
 HWND g_hwndDlg; // Дескриптор окна немодальной диалоговой панели
-HWND g_hList;
+HANDLE g_hFile = NULL;
 
 // Global variables
 HMENU		g_lpszMainMenu;
