@@ -15,12 +15,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpsz
 	HACCEL hAccel;
 	hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
+
+	g_hwndDlg = (HWND)0;
+
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		if (!TranslateAccelerator(hWnd, hAccel, &msg))
+		if (g_hwndDlg == 0 || !IsDialogMessage(g_hwndDlg, &msg))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			if (!TranslateAccelerator(hWnd, hAccel, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
 	}
 	return msg.wParam;
@@ -192,19 +198,55 @@ void km_OnDestroy(HWND hWnd)
 void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	TCHAR buff[200];
+	
+	DWORD dwNumbOfBytes = MAX_BYTES;
+	HANDLE hFile = NULL;
+
 	wsprintf(buff, TEXT("%d"), id);
 
 	switch (id)
 	{
-		case IDC_EDIT: // Обработчик поля Edit
+		case IDC_EDIT:			// Обработчик поля Edit
 		{
 
 		}
 		break;
 		case IDM_FILE_OPEN:
 		{
-			DialogBoxParam((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG2), hWnd, ModLoadDlgProc, 0);
-			//MessageBox(hWnd, TEXT("Нажата IDM_FILE_OPEN"), buff, MB_OK);
+			OPENFILENAME ofn;   // структура для common dialog box
+
+			//Иницализация OPENFILENAME
+			ZeroMemory(&ofn, sizeof(OPENFILENAME));
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = hWnd;  // hwnd – дескриптор окна–влвдельца
+			ofn.lpstrFile = lpszFileSpec;
+			ofn.lpstrFile[0] = '\0';
+			ofn.nMaxFile = sizeof(lpszFileSpec);
+			// Формирование массива строк шаблонов фильтра
+			ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
+			ofn.nFilterIndex = 1; // Индекс для текущего шаблона фильтра
+			ofn.lpstrFileTitle = NULL; // Без заголовка
+			ofn.nMaxFileTitle = 0;
+			ofn.lpstrInitialDir = NULL; // В качестве начального текущий каталог
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+			// Отображение диалогового окна 
+			BOOL fRet = GetOpenFileName(&ofn);
+			if (fRet == FALSE) break;//ошибка в далоге 
+
+			hFile = CreateFile(lpszFileSpec, GENERIC_READ, 0,
+				NULL, OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hFile == INVALID_HANDLE_VALUE)
+			{
+				MessageBox(hWnd, TEXT("Файл не найден"), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+				break;
+			}
+
+			ReadFile(hFile, Buffer, 100, &dwNumbOfBytes, NULL);
+
+			if (hFile) CloseHandle(hFile);
+
 		}
 		break;
 		case IDM_FILE_EXIT:
@@ -212,19 +254,19 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			DestroyWindow(hWnd);
 		}
 		break;
-		case IDM_VIEW_TEXT:
+		case IDM_VIEW_TEXT:		// Команда Просмотр-> Текст
 		{
-			MessageBox(hWnd, TEXT("Нажата IDM_VIEW_TEXT"), buff, MB_OK);
+			DialogBox((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG2), hWnd, ModLoadDlgProc);
 		}
 		break;
-		case IDM_VIEW_BMP:
+		case IDM_VIEW_BMP:		// Команда Просмотр-> Графика
 		{
-			MessageBox(hWnd, TEXT("Нажата IDM_VIEW_BMP"), buff, MB_OK);
+			//MessageBox(hWnd, TEXT("Нажата IDM_VIEW_BMP"), buff, MB_OK);
+			g_hwndDlg = CreateDialog((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG3), hWnd, (DLGPROC)LoadBmpDlgProc);
 		}
 		break;
 		case IDM_HELP_ABOUT:
 		{
-			//MessageBox(hWnd, TEXT("Нажата IDM_HELP_ABOUT"), buff, MB_OK);
 			DialogBox((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, ModAboutDlgProc);
 		}
 		break;
@@ -280,6 +322,8 @@ BOOL CALLBACK ModLoadDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_INITDIALOG:
 		{
+			SetDlgItemText(hDlg, IDC_EDIT1, "");
+			SetDlgItemText(hDlg, IDC_EDIT1, Buffer);
 		}
 		return TRUE;
 		case WM_COMMAND:
@@ -293,7 +337,11 @@ BOOL CALLBACK ModLoadDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 				break;
 
 				case IDLOAD:
-				MessageBox(hDlg, TEXT("Нажата клавиша IDLOAD"), "IDLOAD", MB_OK);
+				{
+					SetDlgItemText(hDlg, IDC_EDIT1, "");
+					wsprintf(Buffer, TEXT("Шаг 2. Стартовый текст"));
+					SetDlgItemText(hDlg, IDC_EDIT1, Buffer);
+				}
 				break;
 			}
 
@@ -303,6 +351,36 @@ BOOL CALLBACK ModLoadDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 		case WM_CLOSE:
 		EndDialog(hDlg, IDCANCEL);
 		break;
+	}
+	return FALSE;
+}
+
+
+// Процедура диалогового окна (BMP)
+BOOL CALLBACK LoadBmpDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
+{
+	switch (mes)
+	{ // Инициализация диалоговой панели
+	case WM_INITDIALOG:
+	{
+
+	} return TRUE;
+	case WM_COMMAND:
+	{
+		switch (wParam)
+		{ // Еще один вариант завершения  работы немодального диалогового окна
+		  // Первый – в обработчике «WM_DESTROY»
+		  // Сообщение от кнопки "OK"
+		case IDOK:
+			//{ сохранение необходимых данных ...}
+			// Сообщение от «Cancel» – завершение без сохранения
+		case IDCANCEL:
+		{ // Уничтожаем диалоговую панель
+			DestroyWindow(hDlg);
+			return TRUE;
+		}
+		}
+	}
 	}
 	return FALSE;
 }

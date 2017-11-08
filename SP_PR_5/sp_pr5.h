@@ -6,9 +6,9 @@
 #include "windowsx.h"
 
 //-- Prototypes -------------------
-LRESULT CALLBACK SimWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ModAboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ModLoadDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK LoadBmpDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 LRESULT CALLBACK Pr2_WndProc(HWND, UINT, WPARAM, LPARAM);
 /* Регистрация класса главного окна */
@@ -44,6 +44,13 @@ LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
 LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
 
+
+#define MAX_BYTES  10000
+
+TCHAR lpszFileSpec[256];
+TCHAR Buffer[MAX_BYTES] = TEXT("Шаг 1. Начало работы");
+
+HWND g_hwndDlg; // Дескриптор окна немодальной диалоговой панели
 HWND g_hList;
 
 // Global variables
