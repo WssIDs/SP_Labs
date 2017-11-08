@@ -111,17 +111,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="sp_pr5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SP_PR5.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="sp_pr5.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\SP_SR3\icon1.ico" />
     <Image Include="bitmap1.bmp" />
     <Image Include="icon1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\SP_SR3\cursor1.cur" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
