@@ -38,7 +38,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SP_SR3.cpp">
+    <ClCompile Include="sp_sr3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

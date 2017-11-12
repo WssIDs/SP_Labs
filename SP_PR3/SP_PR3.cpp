@@ -116,28 +116,6 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 
 			switch (id)
 			{
-				case IDC_LIST:
-				{
-					switch (idNotification)
-					{
-						case LBN_SELCHANGE: // Клик по элементу списка Listbox
-						{
-							LPTSTR LBString = new TCHAR[1024];
-							int selIndex = 0;
-
-							// Получаем индекс текущей ячейки
-							selIndex = SendMessage(hList, LB_GETCURSEL, wParam, NULL);
-
-							// Получаем текст текущей ячейки
-							selIndex = SendMessage(hList, LB_GETTEXT, selIndex, (LPARAM)LBString);
-							MessageBox(hWnd, LBString, TEXT("Сообщение элемента управления"), MB_OK | MB_ICONINFORMATION);
-							delete[]LBString;
-						}
-						break;
-					}
-				}
-				break;
-
 				case IDM_FILE_NEW:
 				{
 					MessageBox(hWnd, TEXT("Нажата IDM_FILE_NEW"), buff, MB_OK);
@@ -189,7 +167,7 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 
 		case WM_MENUSELECT:
 		{
-			int idNotification = HIWORD(wParam);
+			//int idNotification = HIWORD(wParam);
 
 			RECT rc;
 			GetClientRect(hWnd, &rc);
@@ -215,13 +193,6 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 		case WM_CREATE:
 		{
 			MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
-
-			hList = CreateWindowEx(NULL, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD, 20, 210, 200, 100, hWnd, (HMENU)IDC_LIST, g_hInst, NULL);
-
-			//// Добавляем в список несколько строк
-			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Первая тестовая запись");
-			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Вторая тестовая запись");
-			SendMessage(hList, LB_ADDSTRING, NULL, (LPARAM)(LPSTR)"Третяя тестовая запись");
 		}
 		return 0;
 

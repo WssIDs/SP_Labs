@@ -20,9 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{14DB01EA-2F16-46E1-9096-349268EB8ACA}</ProjectGuid>
-    <RootNamespace>SPSR3</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectGuid>{3787226C-7ACC-43A4-A8EC-532126B9CCAD}</ProjectGuid>
+    <RootNamespace>Lab_01</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <ProjectName>SP_SR1</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -111,20 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="cursor1.cur" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="icon1.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="sp_sr3.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="sp_sr3.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="SP_SR3.rc" />
+    <ClCompile Include="sp_sr1.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

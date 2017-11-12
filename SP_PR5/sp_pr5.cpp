@@ -130,7 +130,7 @@ BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 	RECT rc;
 	GetClientRect(hWnd, &rc);
 
-	hEdit = CreateWindow(TEXT("edit"), NULL, WS_CHILD | WS_VSCROLL | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL, rc.left, rc.top, rc.right, rc.bottom-50, hWnd, (HMENU)IDC_EDIT, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+	g_hEdit = CreateWindow(TEXT("edit"), NULL, WS_CHILD | WS_VSCROLL | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL, rc.left, rc.top, rc.right, rc.bottom-50, hWnd, (HMENU)IDC_EDIT, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
 	//SetFocus(hEdit);
 
 	return TRUE;
@@ -154,7 +154,7 @@ void km_OnPaint(HWND hWnd)
 	RECT rc;
 	GetClientRect(hWnd, &rc);
 
-	SetWindowPos(hEdit, HWND_TOP, rc.left, rc.top, rc.right, rc.bottom-50, NULL);
+	SetWindowPos(g_hEdit, HWND_TOP, rc.left, rc.top, rc.right, rc.bottom-50, NULL);
 	EndPaint(hWnd, &ps); // Завершение обновления окна
 }
 
@@ -199,7 +199,6 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	TCHAR buff[200];
 	DWORD dwNumbOfBytes = MAX_BYTES;
-
 	wsprintf(buff, TEXT("%d"), id);
 
 	switch (id)
@@ -211,8 +210,6 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_FILE_OPEN:
 		{
-			if (g_hFile) CloseHandle(g_hFile);
-
 			OPENFILENAME ofn;   // структура для common dialog box
 
 			//Иницализация OPENFILENAME
@@ -228,7 +225,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			ofn.lpstrFileTitle = NULL; // Без заголовка
 			ofn.nMaxFileTitle = 0;
 			ofn.lpstrInitialDir = NULL; // В качестве начального текущий каталог
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXTENSIONDIFFERENT;
 
 			// Отображение диалогового окна 
 			BOOL fRet = GetOpenFileName(&ofn);
@@ -242,11 +239,8 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 				MessageBox(hWnd, TEXT("Файл не найден"), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
 				break;
 			}
-			if (ofn.nFilterIndex == 1)
-			{
-				ReadFile(g_hFile, Buffer, 100, &dwNumbOfBytes, NULL);
-			}
 
+			ReadFile(g_hFile, Buffer, 100, &dwNumbOfBytes, NULL);
 			if (g_hFile) CloseHandle(g_hFile);
 		}
 		break;
@@ -262,7 +256,6 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_VIEW_BMP:		// Команда Просмотр-> Графика
 		{
-			//MessageBox(hWnd, TEXT("Нажата IDM_VIEW_BMP"), buff, MB_OK);
 			g_hwndDlg = CreateDialog((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG3), hWnd, (DLGPROC)LoadBmpDlgProc);
 			ShowWindow(g_hwndDlg, SW_SHOW);
 		}
@@ -380,10 +373,12 @@ BOOL CALLBACK LoadBmpDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 
 			hDC = GetDC(hDlg);
 			hMemDC = CreateCompatibleDC(hDC);
-			hBitmap = (HBITMAP)LoadImage(NULL, "image1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			RECT Rect;
+			GetClientRect(hDlg, &Rect);
+			hBitmap = (HBITMAP)LoadImage(NULL, lpszFileSpec, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 			GetObject(hBitmap, sizeof(BITMAP), &bm);
 			SelectObject(hMemDC, hBitmap);
-			BitBlt(hDC, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY);
+			StretchBlt(hDC, 0, 0,Rect.right,Rect.bottom, hMemDC,0,0,bm.bmWidth, bm.bmHeight,SRCCOPY);
 			DeleteDC(hMemDC);
 			ReleaseDC(hDlg, hDC);
 			DeleteObject(hBitmap);

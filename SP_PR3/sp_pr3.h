@@ -18,6 +18,3 @@ LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщени
 // Global variables
 HINSTANCE g_hInst;
 
-
-#define IDC_LIST 402
-

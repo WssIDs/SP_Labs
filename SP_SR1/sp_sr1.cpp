@@ -7,19 +7,17 @@ LRESULT CALLBACK Pr2_WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //-- Global Variables ------------ 
 LPTSTR g_lpszClassName = TEXT("sp_pr2_class");
-LPTSTR g_lpszlistboxClassName = TEXT("Button");
 LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
 LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
-HINSTANCE g_hInst;
 
 //  Стартовая функция 
-int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+	LPTSTR lpszCmdLine, int nCmdShow)
 {
 	WNDCLASSEX wc;
 	MSG msg;
 	HWND hWnd;
-	g_hInst = hInstance;
 
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -29,7 +27,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpsz
 	wc.hInstance = hInstance;
 	wc.hIcon = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));
 	wc.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+	HBRUSH hbr;
+	hbr = CreateSolidBrush(RGB(255, 0, 0));
+	wc.hbrBackground = hbr;
 
 	wc.lpszMenuName = NULL;
 	wc.cbClsExtra = 0;
@@ -42,9 +42,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpsz
 		return FALSE;
 	}
 
+	DWORD Style;
+	Style = WS_OVERLAPPEDWINDOW ^ WS_MINIMIZEBOX;
+
 	hWnd = CreateWindowEx(NULL, wc.lpszClassName,
 		g_lpszAplicationTitle,
-		WS_OVERLAPPEDWINDOW,
+		Style,
 		200,
 		200,
 		CW_USEDEFAULT,
@@ -86,17 +89,16 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 		MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
 	}
 	return 0;
-
 	case WM_LBUTTONDOWN:
 	{
 		HDC hdc = GetDC(hWnd);//получить контекст
 		int x = LOWORD(lParam);
 		int y = HIWORD(lParam);
 		RECT rect;
-		
-		GetClientRect(hWnd, &rect);		
-		
-		rect.left = x; 
+
+		GetClientRect(hWnd, &rect);
+
+		rect.left = x;
 		rect.top = y;
 		rect.bottom = rect.top + 300;
 
@@ -107,7 +109,6 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 		ReleaseDC(hWnd, hdc);//Освободить контекст
 	}
 	return 0;
-
 	case WM_PAINT:    // Вывод при обновлении окна
 	{
 		PAINTSTRUCT ps;

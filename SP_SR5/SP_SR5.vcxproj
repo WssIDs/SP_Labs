@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{14DB01EA-2F16-46E1-9096-349268EB8ACA}</ProjectGuid>
-    <RootNamespace>SPSR3</RootNamespace>
+    <ProjectGuid>{2F0B7F91-FD6D-4A49-86F4-B72CA84F4BD2}</ProjectGuid>
+    <RootNamespace>SPSR5</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -111,20 +111,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="cursor1.cur" />
-  </ItemGroup>
-  <ItemGroup>
+    <Image Include="..\SP_SR3\icon1.ico" />
+    <Image Include="bitmap1.bmp" />
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="sp_sr3.h" />
+    <ClInclude Include="sp_sr5.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sp_sr3.cpp" />
+    <ClCompile Include="sp_sr5.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SP_SR3.rc" />
+    <ResourceCompile Include="SP_SR5.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\SP_SR3\cursor1.cur" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

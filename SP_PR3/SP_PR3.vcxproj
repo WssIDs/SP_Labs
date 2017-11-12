@@ -111,7 +111,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SP_PR3.cpp" />
+    <ClCompile Include="sp_pr3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
