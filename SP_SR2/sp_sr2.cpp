@@ -11,6 +11,25 @@ LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
 LPTSTR g_lpszDestroyMessage = TEXT("Данный вывод выполнен в обработчике сообщения WM_DESTROY. Сообщение поступило от Windows в связи с разрушением окна.");
 
+
+
+typedef struct
+{
+	TCHAR colorName[26];
+	COLORREF color;
+} ColorItem;
+
+ColorItem Items[] =
+{
+	{ TEXT("Синий"), RGB(0, 0, 255) },
+	{ TEXT("Красный"), RGB(255, 0, 0) },
+	{ TEXT("Зеленый"), RGB(0, 255, 0) },
+	{ TEXT("Черный"), RGB(0, 0, 0) }
+};
+
+
+
+
 //  Стартовая функция 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LPTSTR lpszCmdLine, int nCmdShow)
@@ -80,9 +99,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam)
 {
-	static HWND hEdit;
+	static HWND hListBox;
 
-#define IDC_EDIT		30100 
+#define IDC_LIST	30100 
 
 	HDC hDC;
 
@@ -92,11 +111,19 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	{
 		MessageBox(hWnd, TEXT("Выполняется обработка WM_CREATE"), g_lpszDestroyTitle, MB_OK | MB_ICONEXCLAMATION);
 
-		RECT rc;
-		GetClientRect(hWnd, &rc);
+		hListBox = CreateWindowEx(WS_EX_PALETTEWINDOW,TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_WANTKEYBOARDINPUT, 10, 10, 200, 150, hWnd, (HMENU)IDC_LIST, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
 
-		hEdit = CreateWindow(TEXT("edit"), NULL, WS_CHILD | WS_VSCROLL | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL, rc.left, rc.top, rc.right, rc.bottom, hWnd, (HMENU)IDC_EDIT, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
-		SetFocus(hEdit);
+		for (int i = 0; i < ARRAYSIZE(Items); i++)
+		{
+			int pos = (int)SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)Items[i].colorName);
+			SendMessage(hListBox, LB_SETITEMDATA, pos, (LPARAM)i);
+		}
+
+		SetFocus(hListBox);
+
+		// Перерисовываем список
+		InvalidateRect(hListBox, NULL, TRUE);
+
 	}
 	return 0;
 
@@ -104,12 +131,42 @@ LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg,
 	{
 		PAINTSTRUCT ps;
 		hDC = BeginPaint(hWnd, &ps); // Получение контекста для обновления окна
-		RECT rc;
-		GetClientRect(hWnd, &rc);
-
-		SetWindowPos(hEdit, HWND_TOP, rc.left, rc.top, rc.right, rc.bottom, NULL);
 
 		EndPaint(hWnd, &ps); // Завершение обновления окна
+	}
+	return 0;
+
+	case WM_COMMAND:
+	{
+		switch (LOWORD(wParam))
+		{
+			case IDC_LIST:
+			{
+				switch (HIWORD(wParam))
+				{
+					case LBN_SELCHANGE:
+					{
+						HDC hdc = GetDC(hWnd);//получить контекст
+						RECT rc;
+						GetClientRect(hWnd, &rc);
+
+						RECT rcFill = rc;
+						rcFill.top = rcFill.bottom - 30;
+						rcFill.right = rcFill.left + 300;
+						FillRect(hdc, &rcFill, CreateSolidBrush(RGB(255, 0, 0)));
+
+						int lbItem = (int)SendMessage(hListBox, LB_GETCURSEL, 0, 0);
+						int i = (int)SendMessage(hListBox, LB_GETITEMDATA, lbItem, 0);
+
+						SetTextColor(hdc, Items[i].color);
+						TextOut(hdc, 10, rc.bottom-20,Items[i].colorName, lstrlen(Items[i].colorName));
+						ReleaseDC(hWnd, hdc);
+					}
+					break;
+				}
+			}
+			break;
+		}
 	}
 	return 0;
 
