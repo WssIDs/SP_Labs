@@ -15,35 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Line_drawing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
+    <ClCompile Include="sp_pr7.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Line_drawing.h">
+    <ClInclude Include="sp_pr7.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RESOURCE.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StdAfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Line_drawing.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="SMALL.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Line_drawing.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>
