@@ -184,7 +184,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			if (CreateProcess(NULL, g_lpProcess[1].CmdParam, NULL, NULL, 0, 0, NULL, NULL, &sti, &pi))
 			{
-				g_lpProcess[1].ProcHandle = &pi.hProcess;
+				g_lpProcess[1].ProcHandle = pi.hProcess;
 				g_lpProcess[1].ProcId = pi.dwProcessId;
 				g_lpProcess[1].ThreadHandle = &pi.hThread;
 				g_lpProcess[1].ThreadId = pi.dwThreadId;
@@ -204,7 +204,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			if (CreateProcess(NULL, g_lpProcess[2].CmdParam, NULL, NULL, 0, 0, NULL, NULL, &sti, &pi))
 			{
-				g_lpProcess[2].ProcHandle = &pi.hProcess;
+				g_lpProcess[2].ProcHandle = pi.hProcess;
 				g_lpProcess[2].ProcId = pi.dwProcessId;
 				g_lpProcess[2].ThreadHandle = &pi.hThread;
 				g_lpProcess[2].ThreadId = pi.dwThreadId;
@@ -224,7 +224,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			if (CreateProcess(NULL, g_lpProcess[3].CmdParam, NULL, NULL, 0, 0, NULL, NULL, &sti, &pi))
 			{
-				g_lpProcess[3].ProcHandle = &pi.hProcess;
+				g_lpProcess[3].ProcHandle = pi.hProcess;
 				g_lpProcess[3].ProcId = pi.dwProcessId;
 				g_lpProcess[3].ThreadHandle = &pi.hThread;
 				g_lpProcess[3].ThreadId = pi.dwThreadId;
@@ -237,8 +237,8 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_PROCESS_CLOSECALC:
 		{
-			MessageBox(NULL, "Hello", "Информация", MB_OK);
-			//TerminateProcess(g_lpProcess[3].ProcHandle, NO_ERROR);
+			//MessageBox(NULL, "Hello", "Информация", MB_OK);
+			TerminateProcess(g_lpProcess[3].ProcHandle, 13);
 		}
 		break;
 		case IDM_PROCESSINFO_CURRENT:
@@ -281,10 +281,12 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 		{
 			DWORD dwExitCode;
 
-			SetDlgItemText(hDlg, IDC_PROCNAME, g_lpProcess[lParam].ProcImage);
+			TCHAR procNameText[128];
+			GetModuleFileNameEx(g_lpProcess[lParam].ProcHandle,NULL, procNameText, 128);
+			SetDlgItemText(hDlg, IDC_PROCNAME, procNameText);
 
 			TCHAR procHandleText[128];
-			wsprintf(procHandleText, TEXT("0x%08X"), g_lpProcess[lParam].ProcHandle);
+			wsprintf(procHandleText, TEXT("0x%.8X"), g_lpProcess[lParam].ProcHandle);
 			SetDlgItemText(hDlg, IDC_PROCHANDLE, procHandleText);
 
 			TCHAR procIdText[128];
@@ -292,7 +294,7 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			SetDlgItemText(hDlg, IDC_PROCID, procIdText);
 
 			TCHAR threadHandleText[128];
-			wsprintf(threadHandleText, TEXT("0x%08X"), g_lpProcess[lParam].ThreadHandle);
+			wsprintf(threadHandleText, TEXT("0x%.8X"), g_lpProcess[lParam].ThreadHandle);
 			SetDlgItemText(hDlg, IDC_THREADHANDLE, threadHandleText);
 
 			TCHAR threadIdText[128];
@@ -308,13 +310,11 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			{
 				if (dwExitCode == STILL_ACTIVE)
 				{
-					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Активен"));
+					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Состояние - Активен"));
 				}
 				else
 				{
-					TCHAR processStatus[128];
-					wsprintf(processStatus, TEXT("%d"), dwExitCode);
-					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, processStatus);
+					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Процесс не найден"));
 				}
 			}
 		}

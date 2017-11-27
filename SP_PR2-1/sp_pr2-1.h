@@ -4,6 +4,7 @@
 #include <tchar.h>
 #include "resource.h"
 #include "windowsx.h"
+#include "Psapi.h"
 
 //-- Prototypes -------------------
 BOOL CALLBACK ProcessDlgProc(HWND, UINT, WPARAM, LPARAM);
