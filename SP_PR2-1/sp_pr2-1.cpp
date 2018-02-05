@@ -119,7 +119,7 @@ BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 	g_lpProcess[0].ProcHandle = GetCurrentProcess();
 	g_lpProcess[0].ThreadHandle = GetCurrentThread();
 	g_lpProcess[0].ThreadId = GetCurrentThreadId();
-	
+
 	// Блокнот
 	g_lpProcess[1].ProcImage = TEXT("Notepad");
 	wsprintf(g_lpProcess[1].CmdParam, TEXT("%s"), g_lpProcess[1].ProcImage);
@@ -279,7 +279,7 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_INITDIALOG:
 		{
-			DWORD dwExitCode;
+			DWORD dwExitCode, dwExitCodeThread;
 
 			TCHAR procNameText[128];
 			GetModuleFileNameEx(g_lpProcess[lParam].ProcHandle,NULL, procNameText, 128);
@@ -314,9 +314,30 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Процесс не найден"));
+					TCHAR ExitCodeText[64];
+					wsprintf(ExitCodeText, TEXT("Процесс не найден - %d"), dwExitCode);
+					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, ExitCodeText);
 				}
 			}
+
+			if (!GetExitCodeThread(g_lpProcess[lParam].ThreadHandle, &dwExitCodeThread))
+			{
+
+			}
+			else
+			{
+				if (dwExitCodeThread == STILL_ACTIVE)
+				{
+					SetDlgItemText(hDlg, IDC_THREADSTATUS, TEXT("Состояние - Активен"));
+				}
+				else
+				{
+					TCHAR ExitCodeText[64];
+					wsprintf(ExitCodeText, TEXT("Поток не найден - %d"), dwExitCodeThread);
+					SetDlgItemText(hDlg, IDC_THREADSTATUS, ExitCodeText);
+				}
+			}
+
 		}
 		return TRUE;
 		case WM_COMMAND:
