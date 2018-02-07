@@ -13,6 +13,10 @@
 #define IDC_PROCESSSTATUS               1009
 #define IDC_PROCESSSTATUS2              1010
 #define IDC_THREADSTATUS                1010
+#define IDC_THREADHANDLE2               1011
+#define IDC_THREADID2                   1012
+#define IDC_PROCESSSTATUS3              1013
+#define IDC_THREADSTATUS2               1014
 #define IDM_FILE_EXIT                   40001
 #define ID_40003                        40003
 #define ID_40004                        40004

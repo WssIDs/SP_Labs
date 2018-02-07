@@ -128,7 +128,7 @@ BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 	wsprintf(g_lpProcess[2].CmdParam, TEXT("%s %s"), g_lpProcess[2].ProcImage, TEXT("sp_pr2-1.cpp"));
 
 	// Калькулятор
-	g_lpProcess[3].ProcImage = TEXT("Calc");
+	g_lpProcess[3].ProcImage = TEXT("C:\\Program Files\\Windows NT\\Accessories\\wordpad.exe");
 	wsprintf(g_lpProcess[3].CmdParam, TEXT("%s"), g_lpProcess[3].ProcImage);
 
 	return TRUE;
@@ -238,7 +238,8 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		case IDM_PROCESS_CLOSECALC:
 		{
 			//MessageBox(NULL, "Hello", "Информация", MB_OK);
-			TerminateProcess(g_lpProcess[3].ProcHandle, 13);
+			TerminateProcess(g_lpProcess[3].ProcHandle, 1);
+			CloseHandle(g_lpProcess[3].ProcHandle);
 		}
 		break;
 		case IDM_PROCESSINFO_CURRENT:
@@ -302,6 +303,7 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			SetDlgItemText(hDlg, IDC_THREADID, threadIdText);
 
 
+
 			if(!GetExitCodeProcess(g_lpProcess[lParam].ProcHandle, &dwExitCode))
 			{
 
@@ -310,12 +312,12 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			{
 				if (dwExitCode == STILL_ACTIVE)
 				{
-					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Состояние - Активен"));
+					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Активен"));
 				}
 				else
 				{
 					TCHAR ExitCodeText[64];
-					wsprintf(ExitCodeText, TEXT("Процесс не найден - %d"), dwExitCode);
+					wsprintf(ExitCodeText, TEXT("Код завершения - %d"), dwExitCode);
 					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, ExitCodeText);
 				}
 			}
@@ -328,7 +330,7 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			{
 				if (dwExitCodeThread == STILL_ACTIVE)
 				{
-					SetDlgItemText(hDlg, IDC_THREADSTATUS, TEXT("Состояние - Активен"));
+					SetDlgItemText(hDlg, IDC_THREADSTATUS, TEXT("Активен"));
 				}
 				else
 				{
