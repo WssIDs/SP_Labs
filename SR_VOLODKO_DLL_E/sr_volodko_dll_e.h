@@ -35,3 +35,13 @@ LPTSTR g_lpszClassName = TEXT("sp_pr2-2_class");
 LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 
 HMENU g_lpszMainMenu;
+
+
+typedef int(*pDigitsCount)(char const *);
+typedef void(*pUpdateFile)(char const*, TCHAR*);
+typedef void(*pStartNotepad)(TCHAR *);
+
+
+pDigitsCount DigitsCount;
+pUpdateFile UpdateFile;
+pStartNotepad StartNotepad;

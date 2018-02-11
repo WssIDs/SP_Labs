@@ -1,0 +1,5 @@
+LIBRARY SR_VOLODKO.dll
+EXPORTS
+	DigitsCount
+	UpdateFile
+	StartNotepad

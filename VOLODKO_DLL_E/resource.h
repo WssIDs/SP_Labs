@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SP_PR2-4.rc
+// Used by volodko_dll_e.rc
 //
 #define IDR_ACCELERATOR1                103
 #define IDR_MENU1                       104

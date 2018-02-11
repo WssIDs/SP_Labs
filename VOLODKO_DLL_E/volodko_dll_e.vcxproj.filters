@@ -23,17 +23,17 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sp_pr2-4.h">
+    <ClInclude Include="volodko_dll_e.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SP_PR2-4.rc">
+    <ResourceCompile Include="volodko_dll_e.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sp_pr2-4.cpp">
+    <ClCompile Include="volodko_dll_e.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

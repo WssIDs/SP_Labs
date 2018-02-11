@@ -1,9 +1,5 @@
 
-#include "sp_pr2-4.h"
-#include "../VOLODKO/VOLODKO.h"
-
-#pragma comment(lib,"../DEBUG/VOLODKO.lib")
-
+#include "volodko_dll_e.h"
 
 //  Стартовая функция 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
@@ -116,6 +112,26 @@ HWND Create(HINSTANCE hInstance, int nCmdShow)
 // WM_CREATE
 BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 {
+	HINSTANCE hLib = LoadLibrary(TEXT("../DEBUG/VOLODKO.dll"));
+	if (hLib == NULL)
+	{
+		MessageBox(NULL, TEXT("Ошибка загрузки библиотеки"), NULL, MB_OK);
+		return FALSE;
+	}
+	else
+	{
+		pg_nFnCallsCount = (int *)GetProcAddress(hLib, "g_nFnCallsCount");
+		pg_nDllCallsCount = (int *)GetProcAddress(hLib, "g_nDllCallsCount");
+		Fun11 = (LPFN_FUN11)GetProcAddress(hLib, "Fun11");
+		Fun12 = (LPFN_FUN12)GetProcAddress(hLib, "Fun12");
+		Fun13 = (LPFN_FUN13)GetProcAddress(hLib, "Fun13");
+
+		if (!Fun11 || !Fun12 || !Fun13 || !pg_nFnCallsCount || !pg_nDllCallsCount)
+		{// handle the error
+			FreeLibrary(hLib);
+			MessageBox(NULL, TEXT("Ошибка загрузки функции/переменной из библиотеки"), NULL, MB_OK);
+		}
+	}
 
 	return TRUE;
 }
@@ -163,31 +179,44 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_LIB_FUNC11:
 		{
-			TCHAR buff1[100];
+			(*pg_nFnCallsCount)++;
 
-			Func11(1, 1);
+			int a = 4;
+			int b = 3;
 
-			wsprintf(buff1, TEXT("Вызовов библиотеки: %d, Вызово фнукций: %d "), g_nDllCallsCount, g_nFnCallsCount);
+			int c = Fun11(a, b);
 
-			MessageBox(hWnd, buff1, TEXT("Сообщение из библиотеки"), MB_OK);
+			sprintf_s(buff, TEXT("a = %d, b = %d\nРезультат: %d\nВызовов библиотеки: %d, Вызовов функций: %d"), a, b, c, *pg_nDllCallsCount, *pg_nFnCallsCount);
+
+			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки"), MB_OK);
 		}
 		break;
 		case IDM_LIB_FUNC12:
 		{
-			TCHAR buff1[100];
+			(*pg_nFnCallsCount)++;
 
-			wsprintf(buff1, TEXT("Вызовов библиотеки: %d, Вызово фнукций: %d "), g_nDllCallsCount, g_nFnCallsCount);
+			int a = 4;
+			int b = 3;
+			int c = 6;
+			float d = Fun12(a, b, c);
 
-			MessageBox(hWnd, buff1, TEXT("Сообщение из библиотеки"), MB_OK);
+			sprintf_s(buff, TEXT("a = %d, b = %d, c = %d\nРезультат: %.3f\nВызовов библиотеки: %d, Вызовов функций: %d"), a, b, c, d, *pg_nDllCallsCount, *pg_nFnCallsCount);
+
+			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки"), MB_OK);
 		}
 		break;
 		case IDM_LIB_FUNC13:
 		{
-			TCHAR buff1[100];
+			(*pg_nFnCallsCount)++;
 
-			wsprintf(buff1, TEXT("Вызовов библиотеки: %d, Вызово фнукций: %d "), g_nDllCallsCount, g_nFnCallsCount);
+			double a = 4.0;
+			double b;
 
-			MessageBox(hWnd, buff1, TEXT("Сообщение из библиотеки"), MB_OK);
+			Fun13(a, &b);
+
+			sprintf_s(buff, TEXT("a = %.3f, b = %.3f\nВызовов библиотеки: %d, Вызовов функций: %d "), a, b, *pg_nDllCallsCount, *pg_nFnCallsCount);
+
+			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки"), MB_OK);
 		}
 		break;
 
