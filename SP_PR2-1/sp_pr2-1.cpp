@@ -186,7 +186,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			{
 				g_lpProcess[1].ProcHandle = pi.hProcess;
 				g_lpProcess[1].ProcId = pi.dwProcessId;
-				g_lpProcess[1].ThreadHandle = &pi.hThread;
+				g_lpProcess[1].ThreadHandle = pi.hThread;
 				g_lpProcess[1].ThreadId = pi.dwThreadId;
 			}
 			else
@@ -206,7 +206,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			{
 				g_lpProcess[2].ProcHandle = pi.hProcess;
 				g_lpProcess[2].ProcId = pi.dwProcessId;
-				g_lpProcess[2].ThreadHandle = &pi.hThread;
+				g_lpProcess[2].ThreadHandle = pi.hThread;
 				g_lpProcess[2].ThreadId = pi.dwThreadId;
 			}
 			else
@@ -226,7 +226,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			{
 				g_lpProcess[3].ProcHandle = pi.hProcess;
 				g_lpProcess[3].ProcId = pi.dwProcessId;
-				g_lpProcess[3].ThreadHandle = &pi.hThread;
+				g_lpProcess[3].ThreadHandle = pi.hThread;
 				g_lpProcess[3].ThreadId = pi.dwThreadId;
 			}
 			else
@@ -237,9 +237,8 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_PROCESS_CLOSECALC:
 		{
-			//MessageBox(NULL, "Hello", "Информация", MB_OK);
 			TerminateProcess(g_lpProcess[3].ProcHandle, 1);
-			CloseHandle(g_lpProcess[3].ProcHandle);
+			//CloseHandle(g_lpProcess[3].ProcHandle);
 		}
 		break;
 		case IDM_PROCESSINFO_CURRENT:
@@ -280,8 +279,6 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_INITDIALOG:
 		{
-			DWORD dwExitCode, dwExitCodeThread;
-
 			TCHAR procNameText[128];
 			GetModuleFileNameEx(g_lpProcess[lParam].ProcHandle,NULL, procNameText, 128);
 			SetDlgItemText(hDlg, IDC_PROCNAME, procNameText);
@@ -303,42 +300,110 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			SetDlgItemText(hDlg, IDC_THREADID, threadIdText);
 
 
-
-			if(!GetExitCodeProcess(g_lpProcess[lParam].ProcHandle, &dwExitCode))
+			DWORD dwExitCodeProcess;
+			TCHAR ExitCodeProcessText[64];
+			
+			if(!GetExitCodeProcess(g_lpProcess[lParam].ProcHandle, &dwExitCodeProcess))
 			{
 
 			}
 			else
 			{
-				if (dwExitCode == STILL_ACTIVE)
-				{
-					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, TEXT("Активен"));
-				}
-				else
-				{
-					TCHAR ExitCodeText[64];
-					wsprintf(ExitCodeText, TEXT("Код завершения - %d"), dwExitCode);
-					SetDlgItemText(hDlg, IDC_PROCESSSTATUS, ExitCodeText);
-				}
+				if (dwExitCodeProcess == STILL_ACTIVE) wsprintf(ExitCodeProcessText, TEXT("Активен"));
+				else wsprintf(ExitCodeProcessText, TEXT("%d"), dwExitCodeProcess);
+				
+				SetDlgItemText(hDlg, IDC_PROCESSSTATUS, ExitCodeProcessText);
 			}
 
+
+			DWORD dwExitCodeThread;
+			TCHAR ExitCodeThreadText[64];
+			
 			if (!GetExitCodeThread(g_lpProcess[lParam].ThreadHandle, &dwExitCodeThread))
 			{
 
 			}
 			else
 			{
-				if (dwExitCodeThread == STILL_ACTIVE)
-				{
-					SetDlgItemText(hDlg, IDC_THREADSTATUS, TEXT("Активен"));
-				}
-				else
-				{
-					TCHAR ExitCodeText[64];
-					wsprintf(ExitCodeText, TEXT("Поток не найден - %d"), dwExitCodeThread);
-					SetDlgItemText(hDlg, IDC_THREADSTATUS, ExitCodeText);
-				}
+				if (dwExitCodeThread == STILL_ACTIVE) wsprintf(ExitCodeThreadText, TEXT("Активен"));
+				else wsprintf(ExitCodeThreadText, TEXT("%d"), dwExitCodeThread);
+
+				SetDlgItemText(hDlg, IDC_THREADSTATUS, ExitCodeThreadText);
 			}
+
+			
+			/*приоритет потока*/
+			DWORD dwPriorityClass = GetPriorityClass(g_lpProcess[lParam].ProcHandle);
+			TCHAR BuffPriorityClass[50];
+			wsprintf(BuffPriorityClass, TEXT("%d"), dwPriorityClass);
+			SetDlgItemText(hDlg, IDC_PROCESSCLASSPRIORITY, BuffPriorityClass);
+
+			/*а) время жизни процесса;
+			б) время выполнения в режиме пользователя;
+			в) время выполнения в режиме ядра;
+			г) время простоя.
+			( использовать системные вызовы GetTickCount и GetProcessTimes );*/
+
+			ULARGE_INTEGER uiCreationTime, uiExitTime, uiLifeTime, uiSystemTime, uiKernelTime, uiUserTime, uiIdleTime;
+			FILETIME CreationTime, ExitTime, KernelTime, UserTime, SystemTime, LifeTime, IdleTime;
+
+			//Извлекает текущую системную дату и время. Информация находится в формате согласованного универсального времени (UTC).
+			GetSystemTimeAsFileTime(&SystemTime);
+			uiSystemTime.LowPart = SystemTime.dwLowDateTime;
+			uiSystemTime.HighPart = SystemTime.dwHighDateTime;
+
+			//Извлекает информацию о времени для указанного процесса.
+			GetProcessTimes(g_lpProcess[lParam].ProcHandle, &CreationTime, &ExitTime, &KernelTime, &UserTime);
+
+			uiCreationTime.LowPart = CreationTime.dwLowDateTime;
+			uiCreationTime.HighPart = CreationTime.dwHighDateTime;
+			uiExitTime.LowPart = ExitTime.dwLowDateTime;
+			uiExitTime.HighPart = ExitTime.dwHighDateTime;
+
+			//QuadPart	An unsigned 64 - bit integer.
+			if (uiExitTime.QuadPart != 0)
+				uiLifeTime.QuadPart = uiExitTime.QuadPart - uiCreationTime.QuadPart;
+			else
+				uiLifeTime.QuadPart = uiSystemTime.QuadPart - uiCreationTime.QuadPart;
+
+			LifeTime.dwLowDateTime = uiLifeTime.LowPart;
+			LifeTime.dwHighDateTime = uiLifeTime.HighPart;
+
+			SYSTEMTIME stLifeTime, stKernelTime, stUserTime, stIdleTime;
+
+			FileTimeToSystemTime(&LifeTime, &stLifeTime);
+			TCHAR BuffLifeTime[50];
+			wsprintf(BuffLifeTime, TEXT("%02d:%02d:%02d:%03d"), stLifeTime.wHour, stLifeTime.wMinute, stLifeTime.wSecond,
+				stLifeTime.wMilliseconds);
+			SetDlgItemText(hDlg, IDC_PROCESSTIME, BuffLifeTime);
+
+			FileTimeToSystemTime(&KernelTime, &stKernelTime);
+			TCHAR BuffKernelTime[50];
+			wsprintf(BuffKernelTime, TEXT("%02d:%02d:%02d:%03d"), stKernelTime.wHour, stKernelTime.wMinute, stKernelTime.wSecond,
+				stKernelTime.wMilliseconds);
+			SetDlgItemText(hDlg, IDC_PROCESSKERNELTIME, BuffKernelTime);
+
+			FileTimeToSystemTime(&UserTime, &stUserTime);
+			TCHAR BuffUserTime[50];
+			wsprintf(BuffUserTime, TEXT("%02d:%02d:%02d:%03d"), stUserTime.wHour, stUserTime.wMinute, stUserTime.wSecond,
+				stUserTime.wMilliseconds);
+			SetDlgItemText(hDlg, IDC_PROCESSUSERTIME, BuffUserTime);
+
+			uiKernelTime.LowPart = KernelTime.dwLowDateTime;
+			uiKernelTime.HighPart = KernelTime.dwHighDateTime;
+			uiUserTime.LowPart = UserTime.dwLowDateTime;
+			uiUserTime.HighPart = UserTime.dwHighDateTime;
+
+			uiIdleTime.QuadPart = uiLifeTime.QuadPart - uiKernelTime.QuadPart - uiUserTime.QuadPart;
+
+			IdleTime.dwLowDateTime = uiIdleTime.LowPart;
+			IdleTime.dwHighDateTime = uiIdleTime.HighPart;
+
+			FileTimeToSystemTime(&IdleTime, &stIdleTime);
+			TCHAR BuffIdleTime[50];
+			wsprintf(BuffIdleTime, TEXT("%02d:%02d:%02d:%03d"), stIdleTime.wHour, stIdleTime.wMinute, stIdleTime.wSecond,
+				stIdleTime.wMilliseconds);
+			SetDlgItemText(hDlg, IDC_PROCESSIDLETIME, BuffIdleTime);
 
 		}
 		return TRUE;
