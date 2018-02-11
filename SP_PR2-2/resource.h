@@ -2,19 +2,16 @@
 // Microsoft Visual C++ generated include file.
 // Used by SP_PR2-2.rc
 //
-#define IDD_DIALOG1                     101
 #define IDD_DIALOG2                     102
 #define IDR_ACCELERATOR1                103
 #define IDR_MENU1                       104
-#define IDC_PROCNAME                    1001
 #define IDC_THREADPRIORITY              1002
 #define IDC_THREADSTATE                 1003
-#define IDC_PROCHANDLE                  1005
-#define IDC_PROCID                      1006
 #define IDC_THREADHANDLE                1007
 #define IDC_THREADID                    1008
 #define IDC_EDIT6                       1009
-#define IDC_PROCESSSTATUS               1009
+#define IDC_THREADTIME                  1011
+#define IDC_THREADUSERTIME              1012
 #define IDM_FILE_EXIT                   40001
 #define ID_40003                        40003
 #define ID_40004                        40004
@@ -56,13 +53,20 @@
 #define IDM_THREAD2_CREATE              40040
 #define ID_40041                        40041
 #define IDM_THREAD2_DESTROY             40042
+#define ID_40043                        40043
+#define IDM_THREADINFO_THREAD2          40044
+#define IDM_THREAD2_CREATEWAIT          40045
+#define IDM_THREAD2_SUSPEND             40046
+#define IDM_THREAD2_RESUME              40047
+#define IDM_THREAD2_UPPRIORITY          40048
+#define IDM_THREAD2_DOWNPRIORITY        40049
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40043
+#define _APS_NEXT_COMMAND_VALUE         40045
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

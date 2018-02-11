@@ -1,31 +1,27 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SP_PR2-4.rc
+// Used by SP_PR2-3.rc
 //
+#define IDD_DIALOG2                     102
 #define IDR_ACCELERATOR1                103
 #define IDR_MENU1                       104
+#define IDC_THREADPRIORITY              1002
+#define IDC_THREADSTATE                 1003
+#define IDC_THREADHANDLE                1007
+#define IDC_THREADID                    1008
 #define IDC_EDIT6                       1009
+#define IDC_THREADTIME                  1011
 #define IDM_FILE_EXIT                   40001
 #define ID_40003                        40003
 #define ID_40004                        40004
-#define IDM_EDIT_TEXT                   40005
-#define IDM_VIEW_TEXT                   40006
 #define ID_40007                        40007
-#define IDM_PROCESS_NOTEPAD             40008
 #define ID_40009                        40009
-#define IDM_PROCESS_NOTEPADTEXT         40010
 #define ID_40011                        40011
-#define IDM_PROCESS_CALC                40012
 #define ID_40013                        40013
-#define IDM_PROCESS_CLOSECALC           40014
 #define ID_40015                        40015
 #define ID_Menu                         40016
-#define IDM_PROCESSINFO_CURRENT         40017
-#define IDM_PROCESSINFO_NOTEPAD         40018
 #define ID_40019                        40019
-#define IDM_PROCESSINFO_NOTEPADTEXT     40020
 #define ID_40021                        40021
-#define IDM_PROCESSINFO_CALC            40022
 #define ID_40023                        40023
 #define ID_40024                        40024
 #define ID_40025                        40025
@@ -47,23 +43,21 @@
 #define ID_40041                        40041
 #define IDM_THREAD2_DESTROY             40042
 #define ID_40043                        40043
-#define IDM_LIB_LOAD                    40044
-#define IDM_LIB_FUNC1                   40045
-#define IDM_LIB_FUNC31                  40046
-#define ID_40047                        40047
-#define ID_40048                        40048
-#define IDM_LIB_FUNC32                  40049
-#define IDM_LIB_FUNC33                  40050
-#define IDM_LIB_FUNC11                  40051
-#define IDM_LIB_FUNC12                  40052
-#define IDM_LIB_FUNC13                  40053
+#define IDM_THREADINFO_THREAD2          40044
+#define IDM_THREAD2_CREATEWAIT          40045
+#define IDM_THREAD2_SUSPEND             40046
+#define IDM_THREAD2_RESUME              40047
+#define IDM_THREAD2_UPPRIORITY          40048
+#define IDM_THREAD2_DOWNPRIORITY        40049
+#define IDM_SYNC_ENABLEAGREE            40050
+#define IDM_SYNC_DISABLEAGREE           40051
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40054
+#define _APS_NEXT_COMMAND_VALUE         40050
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

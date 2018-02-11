@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SP_PR2-1.rc
+// Used by SP_SR2-1.rc
 //
 #define IDD_DIALOG1                     101
 #define IDR_ACCELERATOR1                103
@@ -16,6 +16,7 @@
 #define IDC_PROCESSTIME                 1011
 #define IDC_PROCESSUSERTIME             1012
 #define IDC_PROCESSKERNELTIME           1013
+#define IDC_THREADSTATUS2               1014
 #define IDC_PROCESSIDLETIME             1014
 #define IDC_PROCESSCLASSPRIORITY        1015
 #define IDM_FILE_EXIT                   40001
@@ -39,19 +40,16 @@
 #define IDM_PROCESSINFO_NOTEPADTEXT     40020
 #define ID_40021                        40021
 #define IDM_PROCESSINFO_CALC            40022
-#define IDM_PROCESSINFO_WORDPAD         40023
-#define IDM_PROCESS_WORDPAD             40024
-#define IDM_PROCESS_CLOSEWORDPAD        40025
-#define ID_40026                        40026
-#define IDM_PROCESS_TESTPOC             40027
-#define IDM_PROCESS_TESTPROC            40028
+#define IDM_PROCESS_WORDPAD             40023
+#define IDM_PROCESS_CLOSEWORDPAD        40024
+#define IDM_PROCESSINFO_WORDPAD         40025
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40029
+#define _APS_NEXT_COMMAND_VALUE         40026
 #define _APS_NEXT_CONTROL_VALUE         1002
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

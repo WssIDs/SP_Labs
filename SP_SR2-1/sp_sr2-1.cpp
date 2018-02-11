@@ -1,4 +1,4 @@
-#include "sp_pr2-1.h"
+#include "sp_sr2-1.h"
 
 //  Стартовая функция 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
@@ -127,9 +127,25 @@ BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 	g_lpProcess[2].ProcImage = TEXT("Notepad");
 	wsprintf(g_lpProcess[2].CmdParam, TEXT("%s %s"), g_lpProcess[2].ProcImage, TEXT("sp_pr2-1.cpp"));
 
-	// Wordpad
+	// WordPad
 	g_lpProcess[3].ProcImage = TEXT("C:\\Program Files\\Windows NT\\Accessories\\wordpad.exe");
 	wsprintf(g_lpProcess[3].CmdParam, TEXT("%s"), g_lpProcess[3].ProcImage);
+
+
+	if (!(hEditMainWin = CreateWindowEx(NULL,
+		TEXT("EDIT"),
+		TEXT(""),
+		WS_CHILD | WS_VISIBLE | WS_BORDER,
+		40,
+		100,
+		500,
+		500,
+		hWnd,
+		(HMENU)(IDC_EDIT),
+		(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+		NULL))) return -1;
+
+
 
 	return TRUE;
 }
@@ -197,6 +213,31 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDM_PROCESS_NOTEPADTEXT:
 		{
+			OPENFILENAME ofn;   // структура для common dialog box
+
+								//Иницализация OPENFILENAME
+			ZeroMemory(&ofn, sizeof(OPENFILENAME));
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = hWnd;  // hwnd – дескриптор окна–влвдельца
+			ofn.lpstrFile = lpszFileSpec;
+			ofn.lpstrFile[0] = '\0';
+			ofn.nMaxFile = sizeof(lpszFileSpec);
+			// Формирование массива строк шаблонов фильтра
+			ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
+			ofn.nFilterIndex = 2; // Индекс для текущего шаблона фильтра
+			ofn.lpstrFileTitle = NULL; // Без заголовка
+			ofn.nMaxFileTitle = 0;
+			ofn.lpstrInitialDir = NULL; // В качестве начального текущий каталог
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXTENSIONDIFFERENT;
+
+			// Отображение диалогового окна 
+			BOOL fRet = GetOpenFileName(&ofn);
+			if (fRet == FALSE) break;//ошибка в далоге 
+
+			TCHAR cmdBuff[256];
+			wsprintf(cmdBuff, TEXT("%s %s"), g_lpProcess[2].ProcImage, lpszFileSpec);
+			lstrcpy(g_lpProcess[2].CmdParam, cmdBuff);
+
 			PROCESS_INFORMATION pi;
 			STARTUPINFO sti;
 			ZeroMemory(&sti, sizeof(STARTUPINFO));
@@ -208,6 +249,22 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 				g_lpProcess[2].ProcId = pi.dwProcessId;
 				g_lpProcess[2].ThreadHandle = pi.hThread;
 				g_lpProcess[2].ThreadId = pi.dwThreadId;
+
+				WaitForSingleObject(pi.hProcess, INFINITE);
+
+				TCHAR Buffer[MAX_BYTES] = { 0 };
+				HANDLE hFile;
+
+				hFile = CreateFile(ofn.lpstrFile,GENERIC_READ,0, (LPSECURITY_ATTRIBUTES)NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,(HANDLE)NULL);
+
+				if (hFile == INVALID_HANDLE_VALUE) break;
+				
+				DWORD dwNumbOfBytes;
+				ReadFile(hFile, Buffer, 1000, &dwNumbOfBytes, NULL);
+
+				if (hFile) CloseHandle(hFile);
+
+				SetWindowText(hEditMainWin, Buffer);
 			}
 			else
 			{
@@ -241,42 +298,6 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			//CloseHandle(g_lpProcess[3].ProcHandle);
 		}
 		break;
-		case IDM_PROCESS_TESTPROC:
-		{
-			PROCESS_INFORMATION pi;
-			STARTUPINFO sti;
-			ZeroMemory(&sti, sizeof(STARTUPINFO));
-			sti.cb = sizeof(STARTUPINFO);
-			//sti.dwFlags = (STARTF_USESIZE | STARTF_USEPOSITION | STARTF_USESHOWWINDOW);//добавили флаги по изменению размера, положения и режима отображения окна
-			sti.dwX = 40;//позиция левого угла консоли
-			sti.dwY = 40;
-			sti.dwXSize = 500; //размеры окна
-			sti.dwYSize = 500;					
-			//sti.wShowWindow = SW_NORMAL;//режим отображения окна
-
-			TCHAR CmdParam[100];
-
-			lstrcpy(CmdParam, TEXT("TestProc.exe"));
-			if (CreateProcess(NULL,CmdParam,NULL,NULL,0,0,NULL,NULL,&sti,&pi))
-			{
-				WaitForSingleObject(pi.hProcess, 5 * 1000);
-
-				HWND hwndTestProc = FindWindowEx(hWnd, NULL, NULL, "TestProc");//для поиска дочерних окон
-
-				if (hwndTestProc == NULL) 
-				{
-					MessageBox(hWnd, TEXT("Дескриптор окна приложения не найден"), TEXT("Ошибка"), MB_OK);
-					DWORD dwError = GetLastError();
-
-				}
-				else SetWindowPos(hwndTestProc, NULL, 10, 10, 100, 100, SWP_SHOWWINDOW);
-			}
-			else
-			{
-					MessageBox(NULL, TEXT("Процесс TestProc не создан"),TEXT("Информация"), MB_OK);
-			}
-		}
-		break;
 		case IDM_PROCESSINFO_CURRENT:
 		{
 			DialogBoxParam((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, ProcessDlgProc,0);
@@ -295,12 +316,6 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		case IDM_PROCESSINFO_WORDPAD:
 		{
 			DialogBoxParam((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, ProcessDlgProc, 3);
-		}
-		break;
-
-		default:
-		{
-			MessageBox(hWnd, TEXT("Команда не реализована"), buff, MB_OK);
 		}
 		break;
 	}
@@ -373,6 +388,12 @@ BOOL CALLBACK ProcessDlgProc(HWND hDlg, UINT mes, WPARAM wParam, LPARAM lParam)
 			TCHAR BuffPriorityClass[50];
 			wsprintf(BuffPriorityClass, TEXT("%d"), dwPriorityClass);
 			SetDlgItemText(hDlg, IDC_PROCESSCLASSPRIORITY, BuffPriorityClass);
+
+			/*а) время жизни процесса;
+			б) время выполнения в режиме пользователя;
+			в) время выполнения в режиме ядра;
+			г) время простоя.
+			( использовать системные вызовы GetTickCount и GetProcessTimes );*/
 
 			ULARGE_INTEGER uiCreationTime, uiExitTime, uiLifeTime, uiSystemTime, uiKernelTime, uiUserTime, uiIdleTime;
 			FILETIME CreationTime, ExitTime, KernelTime, UserTime, SystemTime, LifeTime, IdleTime;

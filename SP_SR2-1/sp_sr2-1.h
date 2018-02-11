@@ -4,9 +4,14 @@
 #include <tchar.h>
 #include "resource.h"
 #include "windowsx.h"
+#include "Psapi.h"
 
 //-- Prototypes -------------------
-BOOL CALLBACK ThreadDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK ProcessDlgProc(HWND, UINT, WPARAM, LPARAM);
+
+// Загрузка текста
+BOOL CALLBACK ModLoadDlgProc(HWND, UINT, WPARAM, LPARAM);
+
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 /* Регистрация класса главного окна */
@@ -14,9 +19,6 @@ BOOL Register(HINSTANCE);
 /* Создание главного окна */
 HWND Create(HINSTANCE, int);
 
-
-DWORD WINAPI ThreadFunc1(PVOID);
-DWORD WINAPI ThreadFuncWait(PVOID);
 
 /* Обработчики сообщений */
 /*--- WM_CREATE -----------------------------------------------------*/
@@ -35,34 +37,28 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify);
 
 
 //-- Global Variables ------------ 
-LPTSTR g_lpszClassName = TEXT("sp_pr2-2_class");
+LPTSTR g_lpszClassName = TEXT("sp_pr2-1_class");
+LPTSTR g_lpszlistboxClassName = TEXT("Button");
 LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
+LPTSTR g_lpszDestroyTitle = TEXT("Вариант 1");
 
 HMENU g_lpszMainMenu;
-HMENU g_lpszThread1Menu;
-HMENU g_lpszThread2Menu;
 
-struct THREAD_STRUCT
+
+struct PROCSTRUCT
 {
-	HANDLE ThreadHandle;
-	DWORD ThreadId;
-	UINT SecThreadState;//0-активный 1 -спящий
+	HANDLE	ProcHandle;
+	DWORD	ProcId;
+	HANDLE	ThreadHandle;
+	DWORD	ThreadId;
+	LPTSTR	ProcImage;
+	TCHAR   CmdParam[260];
 };
 
-UINT g_uThCount = 0;   // количество созданных вторичных потоков
-THREAD_STRUCT g_lpThread[3];
 
-UINT g_uXPos = 10;
-UINT g_uYPos = 50;
+PROCSTRUCT g_lpProcess[4];
+TCHAR lpszFileSpec[256];
 
-struct THREAD_PARAM
-{
-	int Num;  	//  Номер потока
-	UINT XPos; 	//  Позиция X области вывода
-	UINT YPos;	//  Позиция Y области вывода
-	HWND hWnd; 	//  Дескиптор окна вывода
-};
-
-THREAD_PARAM ThrParam1 = { 1, g_uXPos, g_uYPos, NULL };
-THREAD_PARAM ThrParam2 = { 2, g_uXPos, g_uYPos+50, NULL };
-
+#define MAX_BYTES  10000
+#define IDC_EDIT 200
+static HWND hEditMainWin;

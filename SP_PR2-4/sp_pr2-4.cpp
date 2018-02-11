@@ -161,15 +161,36 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			DestroyWindow(hWnd);
 		}
 		break;
-		case IDM_LIB_LOAD:
+		case IDM_LIB_FUNC11:
 		{
 			TCHAR buff1[100];
 
-			wsprintf(buff1,TEXT("Функция вернула %d"), g_nDllCallsCount);
+			Func11(1, 1);
+
+			wsprintf(buff1, TEXT("Вызовов библиотеки: %d, Вызово фнукций: %d "), g_nDllCallsCount, g_nFnCallsCount);
 
 			MessageBox(hWnd, buff1, TEXT("Сообщение из библиотеки"), MB_OK);
 		}
 		break;
+		case IDM_LIB_FUNC12:
+		{
+			TCHAR buff1[100];
+
+			wsprintf(buff1, TEXT("Вызовов библиотеки: %d, Вызово фнукций: %d "), g_nDllCallsCount, g_nFnCallsCount);
+
+			MessageBox(hWnd, buff1, TEXT("Сообщение из библиотеки"), MB_OK);
+		}
+		break;
+		case IDM_LIB_FUNC13:
+		{
+			TCHAR buff1[100];
+
+			wsprintf(buff1, TEXT("Вызовов библиотеки: %d, Вызово фнукций: %d "), g_nDllCallsCount, g_nFnCallsCount);
+
+			MessageBox(hWnd, buff1, TEXT("Сообщение из библиотеки"), MB_OK);
+		}
+		break;
+
 		default:
 		{
 			MessageBox(hWnd, TEXT("Команда не реализована"), buff, MB_OK);

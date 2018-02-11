@@ -1,4 +1,4 @@
-#include "sp_pr2-2.h"
+#include "sp_pr2-3.h"
 
 
 void for_delay(int param)
@@ -493,6 +493,16 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 			DialogBoxParam((HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), MAKEINTRESOURCE(IDD_DIALOG2), hWnd, ThreadDlgProc, 2);
 		}
 		break;
+		case IDM_SYNC_ENABLEAGREE:
+		{
+			InitializeCriticalSection(&g_cs);
+		}
+		break;
+		case IDM_SYNC_DISABLEAGREE:
+		{
+			DeleteCriticalSection(&g_cs);
+		}
+		break;
 		default:
 		{
 			MessageBox(hWnd, TEXT("Команда не реализована"), buff, MB_OK);
@@ -634,12 +644,16 @@ DWORD WINAPI ThreadFunc1(PVOID pvParam)
 		/* // Взаимное исключение одновременного вывода
 		// серии строк более чем одним потоком
 		WaitForSingleObject(g_hMutex, INFINITE);
-		*/
+		*/			
+		WaitForSingleObject(g_lpThread[1].ThreadHandle, INFINITE);//Чтобы первый поток пошёл занимать секцию только когда она инициализируется
+		EnterCriticalSection(&g_cs);
+		
 		cRun = 0;
 		while (cRun < N - 1)// Цикл вывода серии из N строк
 		{
 			// Цикл однократного продвижения строки от последнего 
 			// символа до первого (перемещение слева направо в области вывода)
+
 			for (int j = 0; j < StringLength; j++)
 			{
 				if (iBeginningIndex == 0)
@@ -662,13 +676,16 @@ DWORD WINAPI ThreadFunc1(PVOID pvParam)
 
 				Sleep(200); // приостановка потока на 200 мсек - замедление цикла
 
+
+
 			} // Конец цикла полного однократного “пробега” строки
 
-		}// Конец цикла вывода серии строк 
 
+		}// Конец цикла вывода серии строк 
 		 /* // конец критического участка кода – вывод серии строк
-		 ReleaseMutex(g_hMutex);
+		 ReleaseMutex(g_hMutex);		
 		 */
+		LeaveCriticalSection(&g_cs);
 	}
 	return 0;
 }

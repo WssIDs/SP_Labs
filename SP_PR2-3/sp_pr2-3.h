@@ -66,3 +66,4 @@ struct THREAD_PARAM
 THREAD_PARAM ThrParam1 = { 1, g_uXPos, g_uYPos, NULL };
 THREAD_PARAM ThrParam2 = { 2, g_uXPos, g_uYPos+50, NULL };
 
+CRITICAL_SECTION g_cs; 
