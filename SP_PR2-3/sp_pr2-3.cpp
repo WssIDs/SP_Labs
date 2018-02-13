@@ -125,6 +125,7 @@ BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 
 	g_lpszThread1Menu = GetSubMenu(g_lpszMainMenu, 1);
 	g_lpszThread2Menu = GetSubMenu(g_lpszMainMenu, 2);
+	g_lpszSyncMenu = GetSubMenu(g_lpszMainMenu, 4);
 
 	g_lpThread[0].ThreadHandle = GetCurrentThread();//дескпритор текущего потока
 	g_lpThread[0].ThreadId = GetCurrentThreadId();//id текущего потока
@@ -496,11 +497,17 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 		case IDM_SYNC_ENABLEAGREE:
 		{
 			InitializeCriticalSection(&g_cs);
+
+			EnableMenuItem(g_lpszSyncMenu, IDM_SYNC_ENABLEAGREE, MF_GRAYED);
+			EnableMenuItem(g_lpszSyncMenu, IDM_SYNC_DISABLEAGREE, MF_ENABLED);
 		}
 		break;
 		case IDM_SYNC_DISABLEAGREE:
 		{
 			DeleteCriticalSection(&g_cs);
+
+			EnableMenuItem(g_lpszSyncMenu, IDM_SYNC_ENABLEAGREE, MF_ENABLED);
+			EnableMenuItem(g_lpszSyncMenu, IDM_SYNC_DISABLEAGREE, MF_GRAYED);
 		}
 		break;
 		default:
@@ -609,83 +616,81 @@ DWORD WINAPI ThreadFunc1(PVOID pvParam)
 	THREAD_PARAM * ThrParam; // Локальная переменная для хранения переданного параметра
 	ThrParam = (THREAD_PARAM *)pvParam;
 
-	TCHAR CreepingLine[100]; // Буфер для символов бегущей строки
-	TCHAR buf[100] = { 0 }; // Рабочий буфер для циклического сдвига строки
+#define MAXCHAR 100
 
-	int   iBeginningIndex; // Индекс начала выводимой последовательности символов
+	TCHAR CreepingLine[MAXCHAR] = { 0 }; // Буфер для символов бегущей строки
+	TCHAR buf[MAXCHAR] = { 0 }; // Рабочий буфер для циклического сдвига строки
+	int   iBeginningIndex;   // Индекс начала выводимой последовательности символов
+	int   StringLength = 0;  // Длина строки
+	TCHAR CountLine[100] = { 0 };
 
-	int   StringLength = 0; // Длина строки
-
-	RECT  rc;
+	RECT  rc, rcC;
 	HDC   hDC;
-	int cRun = 0; // Счетчик “пробегов” строки
-	int N = 5; //  Количество “пробегов” в серии
+	rcC.bottom = 0;
 
-			   // Формирование текста бегущей строки
-	wsprintf(CreepingLine,
-		TEXT("Поток создал Володько В.И."));
-	//  Длинна строки
+	// Формирование текста бегущей строки		 
+	wsprintf(CreepingLine, TEXT("Вторичный поток создал Володько В.И  %d  %d      "),
+		ThrParam->Num, g_lpThread[ThrParam->Num].ThreadId);
+
 	StringLength = iBeginningIndex = lstrlen(CreepingLine);
+	int cRun; // Счетчик “шагов”
+	int N = StringLength;;    // Количество “шагов”	
 
 	lstrcpy(buf, CreepingLine);
 
-	//  Задание прямоугольной области вывода
+	// Задание прямоугольной области вывода
 	GetClientRect(ThrParam->hWnd, &rc);
 	rc.top = ThrParam->YPos;
 	rc.left = ThrParam->XPos;
 	rc.right = rc.right - ThrParam->XPos;
 
-	//  Получение контекста для вывода строки		
-	hDC = GetDC(ThrParam->hWnd);
+	GetClientRect(ThrParam->hWnd, &rcC);
+	rcC.top = ThrParam2.YPos + 30;
+	rcC.left = ThrParam2.XPos;
+	rcC.right = rcC.right - ThrParam2.XPos;
 
-	//  Бесконечный цикл вывода строк сериями по N строк 
+	// Получение контекста для вывода строки		
+	hDC = GetDC(ThrParam->hWnd);
+	DrawText(hDC, buf, sizeof(buf), &rc, DT_LEFT | DT_SINGLELINE);
+	//  Бесконечный цикл вывода строк
 	while (TRUE)
 	{
-		/* // Взаимное исключение одновременного вывода
-		// серии строк более чем одним потоком
-		WaitForSingleObject(g_hMutex, INFINITE);
-		*/			
-		WaitForSingleObject(g_lpThread[1].ThreadHandle, INFINITE);//Чтобы первый поток пошёл занимать секцию только когда она инициализируется
-		EnterCriticalSection(&g_cs);
-		
 		cRun = 0;
-		while (cRun < N - 1)// Цикл вывода серии из N строк
+		Sleep(0);
+		if (g_cs.DebugInfo != NULL)	EnterCriticalSection(&g_cs);
+		while (cRun < N)// Цикл выполняет N шагов
 		{
 			// Цикл однократного продвижения строки от последнего 
 			// символа до первого (перемещение слева направо в области вывода)
-
-			for (int j = 0; j < StringLength; j++)
+			for (int j = 0; j < StringLength - 1; j++)
 			{
-				if (iBeginningIndex == 0)
-				{
-					iBeginningIndex = StringLength;
-					cRun++; // Подсчет количества полных пробегов строки
-				}
-
 				// Cдвиг символов в рабочем буфере на одну позицию
 				TCHAR c;
-				c = buf[StringLength];
-				for (int i = StringLength; i > 0; i--)// Цикл сдвига
+				c = buf[StringLength - 1];
+				for (int i = StringLength - 1; i > 0; i--)// Цикл сдвига
 					buf[i] = buf[i - 1];
 				buf[0] = c;
 
-				// Ввывод строки
-				DrawText(hDC, buf, -1, &rc, DT_LEFT | DT_SINGLELINE);
-
-				iBeginningIndex--;
-
-				Sleep(200); // приостановка потока на 200 мсек - замедление цикла
-
-
-
+				// Вывод строки
+				DrawText(hDC, buf, sizeof(buf), &rc, DT_LEFT | DT_SINGLELINE);
+				if (g_cs.DebugInfo != NULL)
+				{
+					cRun++; // Подсчет количества шагов
+					wsprintf(CountLine,
+						TEXT("Количество шагов вывода: %02d"), cRun);
+					DrawText(hDC, CountLine,
+						sizeof(CountLine), &rcC, DT_LEFT | DT_SINGLELINE);
+					if (cRun == N) break;
+				}
+				// приостановка потока на 150 мсек - замедление цикла
+				Sleep(150);
 			} // Конец цикла полного однократного “пробега” строки
-
-
-		}// Конец цикла вывода серии строк 
-		 /* // конец критического участка кода – вывод серии строк
-		 ReleaseMutex(g_hMutex);		
-		 */
-		LeaveCriticalSection(&g_cs);
+		} // Конец цикла вывода заданного количества строк 
+		if (g_cs.DebugInfo != NULL)
+		{
+			LeaveCriticalSection(&g_cs);
+			Sleep(50);
+		}
 	}
 	return 0;
 }

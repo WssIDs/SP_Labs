@@ -123,7 +123,9 @@ BOOL km_OnCreate(HWND hWnd, LPCREATESTRUCT lpszCreateStruct)
 		pg_nFnCallsCount = (int *)GetProcAddress(hLib, "g_nFnCallsCount");
 		pg_nDllCallsCount = (int *)GetProcAddress(hLib, "g_nDllCallsCount");
 		Fun11 = (LPFN_FUN11)GetProcAddress(hLib, "Fun11");
-		Fun12 = (LPFN_FUN12)GetProcAddress(hLib, "Fun12");
+
+		Fun12 = (LPFN_FUN12)GetProcAddress(hLib,MAKEINTRESOURCEA(2));
+		//Fun12 = (LPFN_FUN12)GetProcAddress(hLib, "Fun12");
 		Fun13 = (LPFN_FUN13)GetProcAddress(hLib, "Fun13");
 
 		if (!Fun11 || !Fun12 || !Fun13 || !pg_nFnCallsCount || !pg_nDllCallsCount)
@@ -188,7 +190,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			sprintf_s(buff, TEXT("a = %d, b = %d\nРезультат: %d\nВызовов библиотеки: %d, Вызовов функций: %d"), a, b, c, *pg_nDllCallsCount, *pg_nFnCallsCount);
 
-			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки"), MB_OK);
+			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки DLL"), MB_OK);
 		}
 		break;
 		case IDM_LIB_FUNC12:
@@ -202,7 +204,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			sprintf_s(buff, TEXT("a = %d, b = %d, c = %d\nРезультат: %.3f\nВызовов библиотеки: %d, Вызовов функций: %d"), a, b, c, d, *pg_nDllCallsCount, *pg_nFnCallsCount);
 
-			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки"), MB_OK);
+			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки DLL"), MB_OK);
 		}
 		break;
 		case IDM_LIB_FUNC13:
@@ -216,7 +218,7 @@ void km_OnCommand(HWND hWnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			sprintf_s(buff, TEXT("a = %.3f, b = %.3f\nВызовов библиотеки: %d, Вызовов функций: %d "), a, b, *pg_nDllCallsCount, *pg_nFnCallsCount);
 
-			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки"), MB_OK);
+			MessageBox(hWnd, buff, TEXT("Сообщение из библиотеки DLL"), MB_OK);
 		}
 		break;
 

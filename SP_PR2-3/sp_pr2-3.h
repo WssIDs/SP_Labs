@@ -41,6 +41,7 @@ LPTSTR g_lpszAplicationTitle = TEXT("Разработчик: Володько Виталий, 60331-1");
 HMENU g_lpszMainMenu;
 HMENU g_lpszThread1Menu;
 HMENU g_lpszThread2Menu;
+HMENU g_lpszSyncMenu;
 
 struct THREAD_STRUCT
 {

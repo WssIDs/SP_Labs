@@ -48,13 +48,24 @@
 #define IDM_THREAD2_DESTROY             40042
 #define ID_40043                        40043
 #define IDM_LIB_LOAD                    40044
+#define ID_40045                        40045
+#define ID_40046                        40046
+#define ID_40047                        40047
+#define ID_40048                        40048
+#define ID_40049                        40049
+#define IDM_MAP_CREATEFILE              40050
+#define IDM_MAP_CREATEMAPFILE           40051
+#define IDM_MAP_VIEWMAP                 40052
+#define IDM_MAP_VIEWUNMAP               40053
+#define IDM_MAP_CLOSEHANDLES            40054
+#define IDM_MAP_NOTEPAD                 40055
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40045
+#define _APS_NEXT_COMMAND_VALUE         40056
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
